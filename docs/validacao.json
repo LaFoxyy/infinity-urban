@@ -1,10 +1,14 @@
 {
   "project": "Infinity Urban",
-  "simulatedChecksPassed": 278,
+  "simulatedChecksPassed": 288,
   "interfaceSimulationsPassed": true,
   "approvedSourcesUnchanged": 52,
   "runtimeRelocationByteIntegrity": true,
   "legacyServerRequired": false,
   "privateDataExcludedFromPackage": true,
-  "visualBrowserInspection": false
+  "visualBrowserInspection": false,
+  "proxySecurityChecksPassed": true,
+  "deploymentScopeValidation": "passed",
+  "containerLinuxValidation": "pending GitHub Actions",
+  "serverChangesApplied": false
 }

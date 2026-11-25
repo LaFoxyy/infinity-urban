@@ -1,0 +1,155 @@
+name: Infinity Urban - validar e publicar
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Keep image publication and this application's deployment in order.
+concurrency:
+  group: infinityboard-${{ github.event_name == 'pull_request' && github.ref || 'production' }}
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Verificar fontes e ausencia de dados privados
+        run: python3 tools/package.py --verify-only
+      - name: Verificar escopo da stack e sintaxe da automacao
+        run: |
+          python3 -m pip install --target .local/validation-tools -r tools/requirements.txt
+          python3 tools/verify-deploy.py
+      - name: Compilar e executar verificacoes simuladas
+        env:
+          URBAN_PORTAL_TEST_ROOT: ${{ github.workspace }}/src/InfinityUrban.Web
+        run: |
+          dotnet build tests/InfinityUrban.Checks/InfinityUrban.Checks.csproj -c Release -o .local/ci-checks -p:UseAppHost=false -p:StaticWebAssetsEnabled=false
+          dotnet .local/ci-checks/InfinityUrban.Checks.dll
+          node tools/interface/check-accommodations-hierarchy.mjs
+          node tools/interface/check-card-actions-ui.mjs
+          node tools/interface/check-channel-general-ui.mjs
+
+  image:
+    needs: checks
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.name.outputs.image }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Definir imagem desta versao
+        id: name
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY,,}:sha-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+      - name: Construir fora do servidor do cliente
+        env:
+          IMAGE: ${{ steps.name.outputs.image }}
+        run: docker build --build-arg VCS_REF="$GITHUB_SHA" --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" --label "org.opencontainers.image.revision=$GITHUB_SHA" -t "$IMAGE" .
+      - name: Testar imagem Linux com limite de recursos e volume persistente
+        env:
+          IMAGE: ${{ steps.name.outputs.image }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROXY_CIDR="$(docker network inspect bridge --format '{{(index .IPAM.Config 0).Subnet}}')"
+          start_app() {
+            docker run -d --name infinityboard-smoke --memory 512m --cpus 0.5 \
+              -p 127.0.0.1:18089:8080 \
+              --mount source=infinityboard-ci-data,target=/app/.local \
+              -e Channex__Enabled=false \
+              -e Hosting__ProxyNetwork="$PROXY_CIDR" \
+              -e AllowedHosts=infinityboard.urbaninfinity.com.br "$IMAGE"
+          }
+          wait_app() {
+            for attempt in $(seq 1 45); do
+              if curl -fsS --max-time 3 -H 'Host: infinityboard.urbaninfinity.com.br' http://127.0.0.1:18089/health/live > /tmp/infinityboard-health.json; then
+                python3 -c 'import json,os; h=json.load(open("/tmp/infinityboard-health.json")); assert h["status"]=="up" and h["version"]==os.environ["GITHUB_SHA"]'
+                return 0
+              fi
+              sleep 2
+            done
+            docker logs --tail 60 infinityboard-smoke
+            return 1
+          }
+          start_app
+          wait_app
+          test "$(docker exec infinityboard-smoke id -u)" = '1654'
+          docker exec infinityboard-smoke sh -c 'test -f /app/.local/runtime/production/stayline.db && printf preserved > /app/.local/ci-marker'
+          python3 <<'PY'
+          import json,urllib.request
+          headers={'Host':'infinityboard.urbaninfinity.com.br','X-Forwarded-Proto':'https','X-Forwarded-For':'198.51.100.25'}
+          with urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:18089/api/auth/form',headers=headers),timeout=10) as response:
+              form=json.load(response)
+              cookies=response.headers.get_all('Set-Cookie') or []
+              assert form['configured'] and any('secure' in cookie.lower() for cookie in cookies)
+              json.dump({'csrf':form['csrfToken'],'cookie':'; '.join(cookie.split(';',1)[0] for cookie in cookies)},open('/tmp/infinityboard-form.json','w'))
+          PY
+          docker stats --no-stream --format '{{.Name}}: {{.MemUsage}}' infinityboard-smoke
+          docker stop -t 60 infinityboard-smoke
+          docker rm infinityboard-smoke
+          start_app
+          wait_app
+          test "$(docker exec infinityboard-smoke cat /app/.local/ci-marker)" = 'preserved'
+          python3 <<'PY'
+          import json,urllib.request,urllib.error
+          form=json.load(open('/tmp/infinityboard-form.json'))
+          headers={'Host':'infinityboard.urbaninfinity.com.br','X-Forwarded-Proto':'https','X-Forwarded-For':'198.51.100.25','Content-Type':'application/json','Cookie':form['cookie'],'X-CSRF-Token':form['csrf']}
+          request=urllib.request.Request('http://127.0.0.1:18089/api/auth/login',headers=headers,data=json.dumps({'email':'invalid','password':''}).encode())
+          try:urllib.request.urlopen(request,timeout=10);raise AssertionError('Invalid form unexpectedly succeeded')
+          except urllib.error.HTTPError as response:
+              assert response.code==400 and 'Informe um email' in json.load(response)['error'],'CSRF protection keys did not survive restart'
+          PY
+          docker stop -t 60 infinityboard-smoke
+          docker rm infinityboard-smoke
+          docker volume rm infinityboard-ci-data
+      - name: Publicar imagem testada no GitHub Container Registry
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE: ${{ steps.name.outputs.image }}
+        run: |
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker push "$IMAGE"
+          printf 'Imagem testada: `%s`\n' "$IMAGE" >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    needs: image
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Atualizar apenas o servico Infinityboard, se configurado
+        env:
+          SERVICE_WEBHOOK: ${{ secrets.INFINITYBOARD_SERVICE_WEBHOOK }}
+        shell: bash
+        run: |
+          if [ -z "$SERVICE_WEBHOOK" ]; then
+            echo 'Imagem pronta. Publicacao no servidor desativada ate configurar o webhook exclusivo do Infinityboard.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          node --input-type=module <<'JS'
+          const fail=message=>{console.error(message);process.exit(1);};
+          let url;try{url=new URL(process.env.SERVICE_WEBHOOK);}catch{fail('Webhook invalido.');}
+          if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash||!/^\/api\/webhooks\/[0-9a-f-]{36}$/i.test(url.pathname))fail('Use a URL HTTPS do webhook de servico exclusivo do Infinityboard, sem parametros.');
+          url.searchParams.set('tag',`sha-${process.env.GITHUB_SHA}`);
+          try{const response=await fetch(url,{method:'POST',redirect:'error',signal:AbortSignal.timeout(30000)});if(!response.ok)fail('O Portainer nao confirmou a solicitacao. Confira somente o servico Infinityboard.');}catch{fail('O acionamento nao foi confirmado; confira o servico antes de repetir.');}
+          let confirmed=false;
+          for(let attempt=0;attempt<30;attempt++){
+            try{const response=await fetch('https://infinityboard.urbaninfinity.com.br/health/live',{cache:'no-store',redirect:'error',signal:AbortSignal.timeout(5000)});const health=await response.json();if(response.ok&&health.status==='up'&&health.version===process.env.GITHUB_SHA){confirmed=true;break;}}catch{}
+            await new Promise(resolve=>setTimeout(resolve,10000));
+          }
+          if(!confirmed)fail('A nova versao nao foi confirmada. Verifique a atualizacao ou o rollback do Infinityboard no Portainer.');
+          console.log('Nova versao confirmada no subdominio Infinityboard.');
+          JS

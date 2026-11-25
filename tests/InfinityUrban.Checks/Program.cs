@@ -91,6 +91,7 @@ using var handler = new HttpClientHandler { CookieContainer = new CookieContaine
 using var client = new HttpClient(handler) { BaseAddress = new Uri(app.Urls.Single()) };
 int count = 0;
 void Check(bool condition, string name) { if (!condition) throw new Exception(name); Console.WriteLine("PASS " + name); count++; }
+await HostingChecks.Run(client,Check);
 async Task<string> FormToken()
 {
     using var response = await client.GetAsync("/api/auth/form");

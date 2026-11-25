@@ -1,0 +1,85 @@
+version: "3.7"
+
+# NEW stack: infinityboard. This file does not replace any existing stack.
+services:
+  web:
+    image: ${INFINITYBOARD_IMAGE:?Informe a imagem ghcr.io com a versao validada}
+    user: "1654:1654"
+    networks:
+      - infinityNet
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      DOTNET_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      AllowedHosts: infinityboard.urbaninfinity.com.br
+      Hosting__ProxyNetwork: 10.0.1.0/24
+      Hosting__SecretsFile: /run/secrets/infinityboard-channex.json
+      Channex__Environment: production
+      # First deployment stays disabled until operational data transfer is complete.
+      Channex__Enabled: ${INFINITYBOARD_CHANNEX_ENABLED:-false}
+      Channex__SourceDirectory: /app/channex
+      DOTNET_gcServer: "0"
+      Logging__LogLevel__Default: Warning
+    secrets:
+      - source: infinityboard_channex_v1
+        target: infinityboard-channex.json
+        uid: "1654"
+        gid: "1654"
+        mode: 0400
+    volumes:
+      - infinityboard_data:/app/.local
+    stop_grace_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == infinityServer
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+        reservations:
+          memory: 128M
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 120s
+      update_config:
+        parallelism: 1
+        order: stop-first
+        failure_action: rollback
+        monitor: 120s
+      rollback_config:
+        parallelism: 1
+        order: stop-first
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=infinityNet
+        - traefik.http.routers.infinityboard.rule=Host(`infinityboard.urbaninfinity.com.br`)
+        - traefik.http.routers.infinityboard.entrypoints=websecure
+        - traefik.http.routers.infinityboard.tls=true
+        - traefik.http.routers.infinityboard.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.infinityboard.service=infinityboard-web
+        - traefik.http.services.infinityboard-web.loadbalancer.server.port=8080
+
+networks:
+  infinityNet:
+    external: true
+    name: infinityNet
+
+volumes:
+  infinityboard_data:
+    external: true
+    name: infinityboard_data
+
+secrets:
+  infinityboard_channex_v1:
+    external: true

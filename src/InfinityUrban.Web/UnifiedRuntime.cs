@@ -8,7 +8,10 @@ public static class UnifiedRuntime
 {
     public static void Configure(WebApplicationBuilder builder)
     {
-        builder.Configuration.AddJsonFile(".local/channex-secrets.json",optional:true).AddEnvironmentVariables();
+        builder.Configuration.AddJsonFile(".local/channex-secrets.json",optional:true);
+        if(builder.Configuration["Hosting:SecretsFile"] is {Length:>0} secretsFile)
+            builder.Configuration.AddJsonFile(secretsFile,optional:false,reloadOnChange:false);
+        builder.Configuration.AddEnvironmentVariables();
         builder.Services.AddDbContextFactory<AppDb>(o=>
         {
             var directory=builder.Configuration["Stayline:DataDirectory"]??Path.Combine(builder.Environment.ContentRootPath,".local","runtime",builder.Configuration["Channex:Environment"]??"production");

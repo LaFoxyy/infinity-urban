@@ -99,7 +99,7 @@ public static class PortalApplication
         });
         configure?.Invoke(builder);
         var app = builder.Build();
-        if (!app.Environment.IsDevelopment()) { app.UseHsts(); app.UseHttpsRedirection(); }
+        app.UseProductionHosting();
         app.Use(async (context, next) =>
         {
             var legacyDocument=false;

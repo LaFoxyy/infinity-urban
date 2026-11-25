@@ -30,3 +30,9 @@ Execute `Validar.ps1` para compilar e rodar as verificações simuladas, os test
 Execute `python tools/package.py` na pasta do projeto para gerar `dist/Infinity-Urban.zip`, sem dados locais, chaves, históricos de execução ou arquivos de compilação. Os scripts SQL são documentação de implantação e não são executados automaticamente.
 
 As versões anteriores e os protótipos foram preservados em **Arquivo**, ao lado desta pasta. Essa pasta é um arquivo privado de desenvolvimento e não faz parte do produto ativo.
+
+## Publicação no servidor
+
+O [guia do Portainer](docs/portainer.md) descreve a implantação exclusiva de `infinityboard.urbaninfinity.com.br`. O Dockerfile e o workflow GitHub preparam e testam a imagem fora do servidor do cliente. A stack está em `deploy/portainer-stack.yml`.
+
+O workflow não aciona o servidor enquanto o webhook exclusivo da nossa aplicação não for configurado como segredo no GitHub. A primeira publicação exige restaurar os dados operacionais no volume próprio antes de habilitar a Channex.
