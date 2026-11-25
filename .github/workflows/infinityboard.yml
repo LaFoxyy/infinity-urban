@@ -122,7 +122,11 @@ jobs:
           IMAGE: ${{ steps.name.outputs.image }}
         run: |
           printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-          docker push "$IMAGE"
+          # Publish the tested Linux manifest directly, without an image index or auxiliary attestations.
+          test "$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "$IMAGE")" = 'linux/amd64'
+          docker push --platform linux/amd64 "$IMAGE"
+          docker manifest inspect "$IMAGE" > /tmp/infinityboard-published-manifest.json
+          python3 -c 'import json; m=json.load(open("/tmp/infinityboard-published-manifest.json")); assert m["schemaVersion"]==2 and "config" in m and "manifests" not in m, "Expected a published single-platform image manifest"'
           printf 'Imagem testada: `%s`\n' "$IMAGE" >> "$GITHUB_STEP_SUMMARY"
 
   deploy:
