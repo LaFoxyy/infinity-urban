@@ -1,0 +1,12 @@
+# Preserve the approved integration byte for byte on Windows, Linux and in Git.
+# -text disables automatic line-ending conversion, without hiding textual diffs.
+src/InfinityUrban.Channex/Approved/** -text
+src/InfinityUrban.Channex/Assets/operations.js -text
+docs/integracao/referencia/** -text
+
+# Deployment scripts use Linux line endings on every platform.
+Dockerfile text eol=lf
+.dockerignore text eol=lf
+.github/**/*.yml text eol=lf
+deploy/**/*.yml text eol=lf
+tools/**/*.py text eol=lf
