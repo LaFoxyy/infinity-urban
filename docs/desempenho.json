@@ -1,0 +1,21 @@
+{
+  "measurement": "Single production metadata read per build using original ChannexClient; excludes login, page rendering and user latency. Network times vary.",
+  "before": {
+    "catalogMilliseconds": 3208,
+    "pickerMilliseconds": 527,
+    "buildings": 2,
+    "apartments": 1,
+    "readOnly": true
+  },
+  "after": {
+    "catalogMilliseconds": 1536,
+    "pickerMilliseconds": 417,
+    "buildings": 2,
+    "apartments": 1,
+    "readOnly": true
+  },
+  "maxConcurrentChannexReads": 4,
+  "crossRequestBusinessDataCache": false,
+  "simulatedChecksPassed": 168,
+  "approvedApiChanged": false
+}

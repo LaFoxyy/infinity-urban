@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1017"><meta name="description" content="Infinity Urban — Gestão de contas e permissões.">
+  <title>Gestão — Infinity Urban</title>
+  <link rel="icon" type="image/png" href="/assets/urban-infinity-icon-dark.png">
+  <link rel="stylesheet" href="/management.css"><script type="module" src="/management.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Ir para o conteúdo</a>
+  <button class="sidebar-backdrop" id="sidebar-backdrop" aria-label="Fechar navegação" hidden></button>
+  <aside class="sidebar" id="sidebar" aria-label="Navegação principal">
+    <a class="brand" href="/acomodacoes" aria-label="Infinity Urban"><img id="brand-icon" src="/assets/urban-infinity-icon-dark.png" width="36" height="36" alt=""><span><strong>Infinity Urban</strong><small>GESTÃO DE PROPRIEDADES</small></span></a>
+    <nav aria-label="Seções do portal"><a class="nav-item" href="/acomodacoes">Acomodações</a></nav>
+  </aside>
+  <div class="main-shell">
+    <header class="topbar">
+      <div class="topbar-left"><button class="icon-button" id="toggle-sidebar" aria-label="Recolher navegação" aria-controls="sidebar" aria-expanded="true" data-icon="panel"></button><button class="updated-at" id="refresh" title="Atualizar lista de contas">Última atualização: <strong id="updated-at">—</strong></button></div>
+      <div class="topbar-right">
+        <label class="language"><span data-icon="languages"></span><span class="sr-only">Idioma</span><select aria-label="Idioma" id="language"><option value="pt-BR">BR Português</option><option value="en">EN English</option><option value="es">ES Español</option></select></label>
+        <button class="icon-button" id="theme-toggle" aria-label="Ativar tema claro" data-icon="sun"></button>
+        <button class="icon-button" id="notifications-toggle" aria-label="Notificações" aria-expanded="false" data-icon="bell"></button>
+        <div class="account-menu"><button class="account" id="account-toggle" aria-expanded="false"><span class="avatar" id="avatar">U</span><span class="account-details"><strong id="account-name">Carregando…</strong><small id="account-role">—</small></span></button><div class="popover" id="account-popover" hidden><p id="account-email"></p><button id="logout" data-icon="logout"><span>Sair da conta</span></button></div></div>
+        <div class="popover notifications" id="notifications-popover" hidden><strong>Notificações</strong><p>O centro de notificações estará disponível em uma próxima etapa.</p></div>
+      </div>
+    </header>
+    <main id="main-content" tabindex="-1">
+      <div class="page-heading"><h1 id="page-title">Gestão</h1><p id="page-subtitle">Vincule apartamentos a proprietários e gerencie contas (Master/Admin)</p></div>
+      <p class="read-only" id="read-only" hidden>Você está em modo de consulta. Somente Master pode alterar contas e permissões.</p>
+      <div class="status-tabs" role="tablist" aria-label="Status das contas" id="status-tabs">
+        <button id="tab-pending" role="tab" aria-controls="users-panel" aria-selected="true" tabindex="0" data-status="pending">Pendentes</button>
+        <button id="tab-approved" role="tab" aria-controls="users-panel" aria-selected="false" tabindex="-1" data-status="approved">Aprovados</button>
+        <button id="tab-rejected" role="tab" aria-controls="users-panel" aria-selected="false" tabindex="-1" data-status="rejected">Rejeitados</button>
+        <button id="tab-all" role="tab" aria-controls="users-panel" aria-selected="false" tabindex="-1" data-status="all">Todos</button>
+      </div>
+      <div class="filters"><label class="sr-only" for="search">Buscar por nome ou email</label><input id="search" type="search" placeholder="Buscar por nome ou email..." autocomplete="off"><label class="sr-only" for="role-filter">Filtrar por função</label><select id="role-filter"><option value="all">Todas as roles</option><option value="master">master</option><option value="admin">admin</option><option value="proprietario">proprietario</option><option value="funcionario">funcionario</option><option value="none">Sem role</option></select></div>
+      <div class="error-banner" id="error-banner" role="alert" hidden><span id="error-text"></span><button id="retry">Tentar novamente</button></div>
+      <section id="users-panel" role="tabpanel" aria-labelledby="tab-pending" aria-busy="true">
+        <div class="table-container"><table><caption class="sr-only">Contas de usuários e permissões</caption><thead><tr><th scope="col" id="col-name">Nome</th><th scope="col" id="col-email">Email</th><th scope="col" id="col-status">Status</th><th scope="col" id="col-role">Role</th><th scope="col" class="actions-column" id="col-actions">Ações</th></tr></thead><tbody id="users-body"><tr><td colspan="5" class="empty" id="loading">Carregando usuários…</td></tr></tbody></table></div>
+        <p class="sr-only" id="result-count" aria-live="polite"></p>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <dialog id="confirm-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description">
+    <form id="confirm-form"><div class="dialog-header"><h2 id="dialog-title"></h2><button type="button" class="icon-button" id="close-dialog" aria-label="Fechar" data-icon="close"></button></div><p id="dialog-description"></p><label for="confirm-email" id="confirm-email-label" hidden>Digite o email da conta para confirmar</label><input id="confirm-email" type="email" autocomplete="off" hidden><p class="dialog-error" id="dialog-error" role="alert" hidden></p><div class="dialog-actions"><button type="button" class="outline-button" id="cancel-dialog">Cancelar</button><button type="submit" class="primary-button" id="confirm-action">Confirmar</button></div></form>
+  </dialog>
+</body>
+</html>

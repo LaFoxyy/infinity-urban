@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1017"><meta name="description" content="Infinity Urban — Gestão de contas e permissões.">
+  <title>Designações — Infinity Urban</title>
+  <link rel="icon" type="image/png" href="/assets/urban-infinity-icon-dark.png">
+  <link rel="stylesheet" href="/management.css"><link rel="stylesheet" href="/accommodations.css"><link rel="stylesheet" href="/assignments.css"><script type="module" src="/assignments.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Ir para o conteúdo</a>
+  <button class="sidebar-backdrop" id="sidebar-backdrop" aria-label="Fechar navegação" hidden></button>
+  <aside class="sidebar" id="sidebar" aria-label="Navegação principal">
+    <a class="brand" href="/acomodacoes" aria-label="Infinity Urban"><img id="brand-icon" src="/assets/urban-infinity-icon-dark.png" width="36" height="36" alt=""><span><strong>Infinity Urban</strong><small>GESTÃO DE PROPRIEDADES</small></span></a>
+    <nav aria-label="Seções do portal"></nav>
+  </aside>
+  <div class="main-shell">
+    <header class="topbar">
+      <div class="topbar-left"><button class="icon-button" id="toggle-sidebar" aria-label="Recolher navegação" aria-controls="sidebar" aria-expanded="true" data-icon="panel"></button><button class="updated-at" id="refresh" title="Atualizar lista de contas">Última atualização: <strong id="updated-at">—</strong></button></div>
+      <div class="topbar-right">
+        <label class="language"><span data-icon="languages"></span><span class="sr-only">Idioma</span><select aria-label="Idioma" id="language"><option value="pt-BR">BR Português</option><option value="en">EN English</option><option value="es">ES Español</option></select></label>
+        <button class="icon-button" id="theme-toggle" aria-label="Ativar tema claro" data-icon="sun"></button>
+        <button class="icon-button" id="notifications-toggle" aria-label="Notificações" aria-expanded="false" data-icon="bell"></button>
+        <div class="account-menu"><button class="account" id="account-toggle" aria-expanded="false"><span class="avatar" id="avatar">U</span><span class="account-details"><strong id="account-name">Carregando…</strong><small id="account-role">—</small></span></button><div class="popover" id="account-popover" hidden><p id="account-email"></p><button id="logout" data-icon="logout"><span>Sair da conta</span></button></div></div>
+        <div class="popover notifications" id="notifications-popover" hidden><strong>Notificações</strong><p>O centro de notificações estará disponível em uma próxima etapa.</p></div>
+      </div>
+    </header>
+
+<main id="main-content" class="assignments-page" tabindex="-1"><div class="accommodation-heading"><div class="page-heading"><h1>Designações</h1><p>Controle quais apartamentos cada conta de proprietário pode consultar</p></div><button class="primary-button" id="new-assignment">+ Nova designação</button></div><p id="assignments-error" class="dialog-error" role="alert" hidden></p><p id="assignment-rooms-error" class="dialog-error" role="alert" hidden></p><section class="assignments-panel"><div class="assignment-filters"><label class="sr-only" for="assignment-search">Buscar conta ou apartamento</label><input type="search" id="assignment-search" placeholder="Buscar por proprietário ou apartamento…"><label class="sr-only" for="assignment-owner-filter">Conta de proprietário</label><select id="assignment-owner-filter"><option value="">Todos os proprietários</option></select><span id="assignment-count"></span></div><div class="assignments-scroll"><table class="assignments-table"><thead><tr><th>Proprietário</th><th>Apartamento</th><th>Designado em</th><th>Designado por</th><th>Ações</th></tr></thead><tbody id="assignment-rows"></tbody></table></div></section></main></div><div class="toast" id="toast" role="status" hidden></div><dialog id="assignment-dialog" class="assignment-dialog"><form id="assignment-form"><h2>Nova designação</h2><p class="form-help">A conta poderá consultar somente os apartamentos designados. É possível selecionar mais de um.</p><label class="assignment-label">Conta de proprietário<select id="assignment-account" required><option value="">Selecione uma conta</option></select></label><label class="assignment-label">Buscar apartamentos<input id="assignment-room-search" type="search" placeholder="Nome, código ou prédio…"></label><div id="assignment-room-options" class="assignment-room-options"></div><p id="assignment-selected-count" class="form-help"></p><p id="assignment-dialog-error" class="dialog-error" role="alert" hidden></p><div class="dialog-actions"><button type="button" id="assignment-cancel" class="outline-button">Cancelar</button><button type="submit" id="assignment-create" class="primary-button">Criar designação</button></div></form></dialog></body></html>

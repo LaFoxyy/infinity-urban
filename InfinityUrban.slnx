@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/InfinityUrban.Web/InfinityUrban.Web.csproj" />
+    <Project Path="src/InfinityUrban.Channex/InfinityUrban.Channex.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/InfinityUrban.Checks/InfinityUrban.Checks.csproj" />
+  </Folder>
+</Solution>

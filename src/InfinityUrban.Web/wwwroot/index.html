@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1017">
+  <meta name="description" content="Infinity Urban — Gestão de Propriedades. Acesse sua conta.">
+  <title>Infinity Urban — Gestão de Propriedades</title>
+  <link rel="icon" type="image/png" href="/assets/urban-infinity-icon-light.png" media="(prefers-color-scheme: light)">
+  <link rel="icon" type="image/png" href="/assets/urban-infinity-icon-dark.png" media="(prefers-color-scheme: dark)">
+  <link rel="apple-touch-icon" href="/assets/urban-infinity-icon-light.png">
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <main>
+    <section class="auth-card" aria-labelledby="brand-title" id="auth-card">
+      <header class="brand">
+        <img src="/assets/urban-infinity-dark.png" alt="Infinity Urban" width="128" height="128">
+        <h1 class="sr-only" id="brand-title">Infinity Urban</h1>
+        <p id="description">Acesse sua conta ou solicite cadastro</p>
+      </header>
+      <div class="tabs" role="tablist" aria-label="Acesso à conta" id="tabs">
+        <button type="button" id="tab-login" role="tab" aria-controls="panel-login" aria-selected="true" tabindex="0">Entrar</button>
+        <button type="button" id="tab-signup" role="tab" aria-controls="panel-signup" aria-selected="false" tabindex="-1">Criar conta</button>
+      </div>
+      <div role="tabpanel" aria-labelledby="tab-login" id="panel-login">
+        <form id="login-form">
+          <div class="field"><label for="login-email">Email</label><input type="email" id="login-email" name="email" autocomplete="username" maxlength="254" required></div>
+          <div class="field"><label for="login-password">Senha</label><div class="password-field"><input type="password" id="login-password" name="password" autocomplete="current-password" maxlength="4096" required><button type="button" class="password-toggle" aria-label="Mostrar senha" aria-pressed="false" data-password="login-password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+          <button type="submit" class="primary">Entrar</button>
+          <button type="button" class="text-button" id="forgot-password">Esqueci minha senha</button>
+        </form>
+      </div>
+      <div role="tabpanel" aria-labelledby="tab-signup" id="panel-signup" hidden>
+        <form id="signup-form">
+          <div class="field"><label for="signup-name">Nome completo</label><input id="signup-name" name="name" autocomplete="name" maxlength="150" required></div>
+          <div class="field"><label for="signup-email">Email</label><input type="email" id="signup-email" name="email" autocomplete="email" maxlength="254" required></div>
+          <div class="field"><label for="signup-password">Senha</label><div class="password-field"><input type="password" id="signup-password" name="password" autocomplete="new-password" maxlength="4096" minlength="8" required><button type="button" class="password-toggle" aria-label="Mostrar senha" aria-pressed="false" data-password="signup-password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+          <button type="submit" class="primary">Criar conta</button>
+          <p class="signup-note">Sua conta ficará pendente até a aprovação de um administrador.</p>
+        </form>
+      </div>
+      <form id="recovery-form" hidden>
+        <div class="field"><label for="recovery-email">Email</label><input type="email" id="recovery-email" name="email" autocomplete="email" maxlength="254" required></div>
+        <button type="submit" class="primary">Enviar link de redefinição</button>
+        <button type="button" class="text-button back" id="back-to-login">Voltar para o login</button>
+      </form>
+      <p id="feedback" class="feedback" role="alert" hidden></p>
+    </section>
+    <section class="auth-card session-card" id="session-card" aria-labelledby="session-title" hidden>
+      <img src="/assets/urban-infinity-dark.png" alt="Infinity Urban" width="128" height="128">
+      <h1 id="session-title">Bem-vindo à Infinity Urban</h1>
+      <p id="session-email"></p>
+      <p>Seu acesso foi autenticado. O portal está em preparação.</p>
+      <button type="button" class="primary" id="logout">Sair da conta</button>
+      <p class="feedback" role="alert" id="session-feedback" hidden></p>
+    </section>
+    <noscript>Ative o JavaScript para acessar sua conta.</noscript>
+  </main>
+</body>
+</html>

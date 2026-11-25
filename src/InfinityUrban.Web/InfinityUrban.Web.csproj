@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseAppHost>false</UseAppHost>
+    <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
+    <DefaultItemExcludes>$(DefaultItemExcludes);.local/**;App_Data/**</DefaultItemExcludes>
+    <UserSecretsId>urban-infinity-portal</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup><Content Include="Pages/**/*.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" /></ItemGroup>
+  <ItemGroup><ProjectReference Include="../InfinityUrban.Channex/InfinityUrban.Channex.csproj" AdditionalProperties="StaticWebAssetsEnabled=false" /></ItemGroup>
+  <ItemGroup><Content Remove=".local/**;App_Data/**"/><None Remove=".local/**;App_Data/**"/></ItemGroup>
+</Project>

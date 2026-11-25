@@ -1,0 +1,469 @@
+URBAN INFINITY — CADASTRO DIRETO NA CHANNEX
+
+O site local está em http://localhost:5189/login.
+Execute Iniciar.cmd quando o servidor estiver fechado. Requer .NET SDK 10.
+
+COMPORTAMENTO CORRIGIDO
+Salvar um prédio cria a propriedade na Channex imediatamente, com nome,
+moeda, fuso, endereço, contato e descrição. Não é preciso cadastrar um Room
+antes nem ir a Channex & sync para que a propriedade exista na Channex.
+Salvar um apartamento cria imediatamente o Room, a galeria ordenada de até
+10 fotos, as comodidades, a descrição e a tarifa dentro do prédio selecionado.
+O servidor consulta novamente os registros na Channex antes de confirmar
+sucesso. Um HTTP 200/201 sem os campos esperados não vira falso sucesso.
+O envio das imagens para armazenamento da Channex pode continuar por alguns
+segundos após o registro das fotos.
+
+A lista de acomodações usa exclusivamente dados da Channex. Os endpoints de
+listagem resumida omitem conteúdo na produção, portanto o site consulta também
+o detalhe de cada propriedade e Room, com no máximo quatro consultas em paralelo.
+Dados ausentes na Channex não são preenchidos com conteúdo local.
+Código, quartos, camas e banheiros ficam na descrição do Room na Channex;
+a API não possui campos estruturados próprios para esses complementos.
+A diária base é lida do plano tarifário remoto.
+
+O catálogo não salva conteúdo de propriedades, quartos ou fotos em arquivos
+locais nem cria rascunhos locais no banco. Guarda somente identificadores,
+hashes e estados técnicos de entrega para impedir duplicação após falha de rede.
+O banco operacional, os endpoints e os workers originais da Stayline continuam
+intactos, pois fazem parte da API aprovada. Channex & sync continua disponível
+para as operações aprovadas de calendário e reservas, sem ser uma etapa do
+cadastro de acomodações.
+
+RECUPERAÇÃO REAL REALIZADA EM 17/11/2026
+Os dados pendentes de Teste1 e AP Teste foram enviados aos IDs já existentes.
+Endereço, contato e descrição do prédio foram confirmados por leitura da API.
+Descrição, detalhes, tarifa e seis fotos do apartamento foram confirmados.
+As seis fotos possuem URLs distintas e o room_type_id do AP Teste.
+Os arquivos antigos de complementos foram removidos somente após a conferência.
+Não houve criação de outro prédio ou Room, nem envio de preços/disponibilidade
+nessa recuperação. Os outros cadastros não foram alterados.
+
+CONFIGURAÇÃO
+A integração usa https://app.channex.io/api/v1/ (produção).
+A chave privada está apenas em Portal/.local/channex-secrets.json nesta máquina.
+A pasta .local e as credenciais não são incluídas no ZIP.
+Em outra instalação configure Channex__ApiKey no servidor ou o mesmo arquivo
+privado. Nunca coloque a chave em arquivos públicos ou no navegador.
+O iniciador usa Development para o HTTP local e Channex production para a API
+externa. São configurações independentes.
+
+VALIDAÇÃO
+Compilação sem erros ou avisos. 125 verificações simuladas passaram, incluindo
+salvamento remoto completo, leitura de confirmação, galerias omitidas nas listas
+resumidas, proibição de fallback local, limite de fotos, permissões e duplicação.
+A própria listagem nova foi executada contra produção e retornou o apartamento
+com suas seis fotos. Não foi feita nova inspeção visual em navegador.
+A criação de registros novos foi testada com transporte simulado. A recuperação
+dos registros existentes e a leitura posterior foram reais em produção.
+A aplicação não foi publicada na internet.
+
+Após a atualização do servidor, entre novamente na conta.
+Preserve a pasta .local: ela contém configuração privada e registros técnicos.
+Não execute duas instâncias operando o mesmo inventário.
+
+Testes a partir desta pasta:
+$env:URBAN_PORTAL_TEST_ROOT = (Resolve-Path ./Portal).Path
+dotnet run --project Checks/Checks.csproj -p:StaticWebAssetsEnabled=false
+Não publique o executável Checks.
+
+Fontes:
+https://docs.channex.io/api-v.1-documentation/hotels-collection/create-property-api
+https://docs.channex.io/api-v.1-documentation/room-types-collection
+https://docs.channex.io/api-v.1-documentation/photos-collection
+
+CONTEÚDO NA CRIAÇÃO DO PRÉDIO
+O formulário agora inclui logo, descrição, comodidades da propriedade,
+informações importantes e galeria de até 30 fotos ordenáveis.
+O logo é separado da galeria. Os Rooms continuam com até 10 fotos cada.
+Todos os campos são enviados no cadastro da propriedade diretamente à Channex,
+sem arquivo local de conteúdo. A confirmação confere também esses novos campos.
+Comodidades de prédio usam property_facilities; comodidades de apartamento
+usam room_facilities. As duas galerias e os dois dicionários são independentes.
+A ampliação foi testada em simulação; não foi criado nenhum prédio real para teste.
+
+PROPRIETÁRIOS — SUPABASE
+A aba Proprietários tem busca por proprietário/apartamento, filtro por inicial,
+cartões de contato e lista dos Rooms de cada proprietário, com fotos da Channex.
+Master e Admin podem cadastrar, editar, excluir contatos sem vínculos, vincular,
+trocar e desvincular proprietários. Funcionário pode consultar.
+Cada Room tem um proprietário atual; um proprietário pode ter vários Rooms.
+É possível escolher ou cadastrar o proprietário durante a criação do apartamento,
+ou vincular depois pelos detalhes do apartamento ou pela aba Proprietários.
+Se o Room for criado e o vínculo falhar, o formulário permite concluir somente
+o vínculo, sem criar outro apartamento.
+
+Contatos e vínculos são gravados exclusivamente nas novas tabelas Supabase:
+public.urban_channex_owners e public.urban_channex_room_owners.
+Os vínculos usam o ID do Room Type e o ID do prédio, verificados na Channex.
+O cadastro do contato não cria conta Auth nem concede acesso ao portal.
+Os dados da Guesty não foram migrados nem alterados.
+Os proprietários não são enviados para a Channex. O fluxo usa a sessão Supabase
+do usuário, sem chave service_role e sem nova Edge Function.
+
+As tabelas já foram criadas no projeto Supabase conectado. Os arquivos em
+Database/ documentam o esquema aplicado; não os execute novamente nesse projeto.
+As permissões do banco foram verificadas em produção dentro de uma transação
+revertida: Master pode gravar, Funcionário apenas consultar e contas sem
+permissão não leem nem alteram os contatos. Nenhum contato fictício persistiu.
+Nenhuma alteração foi necessária nos arquivos da API aprovada da Stayline.
+Não foi possível realizar inspeção visual em navegador nesta sessão.
+
+DESIGNAÇÕES — CONTAS E ACESSO POR APARTAMENTO
+A aba Designações está disponível para Master e Admin. Ela usa as contas
+existentes da Gestão, aprovadas e com função Proprietário sem funções de equipe.
+É possível selecionar vários apartamentos em uma operação, pesquisar as
+associações e remover uma designação. Repetir o cadastro preserva o primeiro
+registro e não duplica a associação, a data ou o responsável.
+
+As designações são armazenadas no Supabase, na tabela
+public.urban_channex_assignments. Cada par conta/Room é único por ambiente.
+O servidor verifica o Room e seu prédio na Channex antes de gravar os IDs.
+Nenhum proprietário é enviado para a Channex e a API aprovada não é alterada.
+As designações antigas da Guesty e os contatos da aba Proprietários são
+independentes: contato de proprietário não equivale a permissão de conta.
+
+A conta de proprietário vê Minhas acomodações, contendo somente os Rooms
+designados e a localização básica dos respectivos prédios. Ela não recebe
+outros apartamentos do mesmo prédio, fotos da propriedade, contatos privados
+do prédio, tarifas de outros Rooms ou dados de gestão de contas.
+Nesta etapa o acesso do proprietário é de consulta aos dados dos apartamentos.
+As operações completas de calendário, reservas e sincronização continuam
+reservadas à equipe, pois seus endpoints originais trabalham por prédio.
+Esses endpoints ficam bloqueados para contas de proprietário; não há liberação
+indireta das informações de outros Rooms por essas rotas.
+
+A filtragem é feita no servidor, com a sessão real do usuário, e no Supabase
+com RLS. Não depende de esconder menus nem aceita userId do navegador como
+identidade. A lista é vazia quando não existem designações. Se o Supabase não
+puder validar o acesso, o servidor não retorna o catálogo completo.
+A verificação é refeita depois das consultas à Channex para bloquear uma
+resposta caso a designação tenha sido revogada durante o carregamento.
+URLs de Rooms não designados são recusadas. Não há cache de permissões.
+
+Validação: 125 verificações simuladas passaram, incluindo acesso por Room,
+dois apartamentos do mesmo prédio, manipulação de URL/conta, indisponibilidade
+do Supabase e revogação antes e durante a consulta. O teste real de RLS usou
+contas existentes dentro de uma transação revertida; confirmou isolamento
+entre dois proprietários, proibição de autodesignação e remoção por Master.
+Nenhuma designação fictícia persistiu. A revisão do banco não apontou novos
+problemas de segurança ou índices ausentes nas tabelas de designações.
+Não foi possível realizar nova inspeção visual em navegador.
+
+
+DESPESAS RECORRENTES E AVULSAS
+A aba Despesas recorrentes permite cadastrar, consultar, editar e excluir
+valores mensais, por estadia ou avulsos (lançamento único). O formulário inclui
+nome, valor, moeda, categoria existente, apartamento opcional e descrição.
+Mensais e por estadia têm mês inicial e mês final opcional; avulsas têm uma
+data específica. Qualquer tipo pode ficar sem apartamento. A busca e os filtros
+permitem separar despesas por nome, apartamento e tipo.
+
+Os registros são gravados exclusivamente no Supabase, em
+public.urban_channex_expenses. As categorias existentes são apenas consultadas.
+As tabelas e funções da Guesty permanecem intactas. O vínculo usa o ID real
+do Room Type e o prédio confirmado na Channex; a moeda deve ser a do prédio.
+Sem apartamento, a moeda pode ser escolhida entre as nove moedas aceitas.
+Os valores são guardados em centavos inteiros, sem arredondamento binário.
+Edições concorrentes são recusadas para evitar sobrescrever outra alteração;
+repetir a mesma criação não duplica a despesa.
+
+Master e Admin podem cadastrar, editar e excluir. Funcionário pode consultar.
+Proprietários não têm acesso, mesmo aos gastos de apartamentos designados.
+A restrição existe no servidor e no banco, além do menu. O fluxo usa o JWT do
+usuário, sem service_role ou novas Edge Functions. Não há dados financeiros
+salvos localmente nem enviados à Channex. O código da API aprovada foi
+preservado integralmente. A tabela já foi criada no projeto conectado;
+Database/expenses.sql documenta a migração aplicada.
+
+Nesta etapa são cadastradas regras mensais/por estadia e despesas avulsas;
+a geração de ocorrências por reserva/mês, relatórios e pagamentos automáticos
+não fazem parte desta entrega.
+
+Validação atual: 153 verificações simuladas passaram, incluindo despesas,
+permissões, precisão monetária, vigência, repetição e conflitos de edição.
+A conversão de valores brasileiros para centavos e seu retorno foi verificada.
+O teste real de RLS foi revertido: confirmou consulta por funcionário,
+gravacão por Master, bloqueio de funcionário para alterações e bloqueio de
+proprietário designado e anônimos. Nenhuma despesa ou designação fictícia
+persistiu. Não houve alertas de segurança ou índices ausentes para a nova
+tabela; índices ainda sem uso são esperados numa tabela recém-criada.
+Não foi possível inspecionar a aparência em navegador nesta sessão.
+
+
+ATUALIZAÇÃO — VÍNCULO DE DESPESA COM PRÉDIO OU APARTAMENTO
+O formulário agora tem marcações Sem vínculo, Apartamento e Prédio.
+Apartamento exibe somente Rooms; Prédio exibe somente propriedades Channex.
+A lista é consultada novamente ao abrir o formulário, por uma consulta simples
+que não depende de fotos, tarifas ou comodidades. Falhas de carregamento são
+informadas; não é possível salvar um vínculo vazio ou não confirmado.
+Os filtros também diferenciam despesas de prédio e apartamento. Nas despesas
+de prédio, somente property_id é preenchido; nas de apartamento, room_type_id
+e seu prédio são confirmados na Channex. A categoria e os valores continuam
+exclusivamente no Supabase. Os vínculos antigos foram preservados.
+A migração Database/expenses-building-target.sql já foi aplicada.
+Validação: 160 verificações simuladas passaram; a consulta real de produção
+retornou 2 prédios e 1 apartamento pelo cliente aprovado, somente com GET.
+A gravação de vínculo com prédio foi verificada no banco em transação revertida,
+sem despesas fictícias persistentes. Não houve alteração na API aprovada.
+
+
+DESEMPENHO — 18/11/2026
+As consultas independentes de propriedades, Rooms, tarifas e comodidades
+agora se sobrepõem, com no máximo quatro requisições Channex simultâneas por
+instância de serviço. Os seletores de Designações usam apenas as coleções de
+prédios e apartamentos, sem carregar fotos, tarifas ou comodidades.
+As telas de Acomodações, Proprietários, Designações e Despesas buscam seus
+conjuntos independentes de dados em paralelo. O Supabase também consulta
+perfil e funções em paralelo, preservando validação remota a cada requisição.
+A consulta duplicada do status foi removida: a decisão agora usa o status do
+mesmo perfil carregado com as funções. Identidade, perfil aprovado e funções
+continuam obrigatórios antes de liberar qualquer dado. Não há cache entre
+requisições de permissões nem de dados comerciais.
+
+Na medição de produção, a consulta completa do catálogo passou de 3208 ms
+para 1536 ms; o seletor simples passou de 527 ms para 417 ms. São medições
+pontuais de leitura na Channex, sujeitas à rede, sem incluir login e navegador.
+Os detalhes estão em DESEMPENHO.json. Não houve gravação na Channex.
+Passaram 168 verificações simuladas, incluindo concorrência limitada a quatro,
+leitura atualizada, bloqueio de contas rejeitadas e isolamento por apartamento.
+As verificações do formulário de despesas também passaram. A API original
+permanece integralmente preservada. Não houve mudança de esquema no Supabase.
+
+
+MAPEAMENTO AIRBNB — 24/11/2026
+Nova aba Mapeamento Airbnb em /mapeamento, somente para Master e Admin.
+Exibe as conexões Airbnb existentes, seus anúncios e os vínculos já salvos.
+Para um anúncio não mapeado, permite escolher prédio, apartamento e tarifa.
+A seleção é limitada aos prédios associados à conexão na Channex.
+O formulário exige confirmar a correspondência entre anúncio e apartamento.
+Salvar usa POST /channels/{id}/mappings com o payload próprio do Airbnb.
+Esse endpoint pode iniciar a sincronização de preços, disponibilidade e
+restrições; nenhuma ativação, publicação ou exclusão é feita automaticamente.
+A conexão atual estava ativa e continha um anúncio não mapeado na verificação.
+Conexões inativas mostram o estado e devem ser ativadas na Channex nesta etapa.
+Não há alteração automática de vínculos existentes; eles aparecem para consulta.
+
+A leitura utiliza o ChannexClient original, sem alterações no código aprovado.
+A escrita nova fica em serviço separado. Não há iframe nem cópia de dados de
+anúncios para banco local/Supabase. Os tokens OAuth e configurações privadas
+permanecem no servidor e nunca são enviados ao navegador.
+Os registros privados em .local contêm somente IDs, hash e estado da entrega,
+para impedir duplo envio e recuperar o resultado de uma resposta perdida.
+Se uma entrega ficar incerta, consulte a Channex antes de tentar novamente;
+o sistema não repete automaticamente uma operação que possa ter sido aceita.
+Após envio, uma leitura confirma o vínculo ou mostra confirmação pendente.
+A latência própria do mapeamento Airbnb pode chegar a cerca de 30 segundos.
+Esta tela mapeia anúncio/tarifa no canal. O mapeamento operacional do PMS,
+recepção de reservas e sua validação continuam no fluxo original Channex & sync.
+
+Validação: 185 verificações simuladas passaram, incluindo salvamento, CSRF,
+permissões, proteção dos tokens, vínculo existente, estado incerto e repetição.
+A lógica do formulário e dos seletores passou em simulação de DOM.
+A leitura real pelo serviço .NET retornou 1 conexão, 1 anúncio ainda sem vínculo,
+2 prédios, 1 apartamento e 1 tarifa. Nenhum mapeamento real foi gravado.
+A inspeção visual não pôde ser concluída: o controlador de navegador falhou.
+
+
+RESERVAS E CALENDÁRIO — 24/11/2026
+Nova área /reservas com abas Lista e Calendário. Os menus Calendário e Reservas
+apontam para essa área; os endereços antigos /operacoes#calendar e #reservations
+encaminham para a nova interface. Channex & sync mantém a configuração original.
+
+A lista usa as reservas recebidas e processadas pelo BookingInboxWorker aprovado,
+junto com as reservas diretas cadastradas pela equipe. O calendário exibe 21 dias,
+com linhas por apartamento, barras de estadia e disponibilidade lida na Channex.
+Check-out é exclusivo: a data de saída não conta como noite ocupada. Canceladas
+podem ser incluídas ou ocultadas. Há busca, filtros por prédio/status/período,
+contadores, paginação da lista e detalhes de cada reserva. A tela se atualiza a
+cada minuto enquanto visível e sem um formulário aberto; Atualizar Channex
+aciona o mesmo consumidor de feed já aprovado, com persistência antes do ACK.
+
+Master, Admin e Funcionário podem criar reservas manuais pelo novo formulário.
+O cadastro exige apartamento, tarifa e período, consulta o feed antes de gravar,
+verifica a disponibilidade remota e usa o PmsService original para gravar a
+reserva direta e enfileirar os deltas de disponibilidade. Validação transacional
+original impede sobreposição mesmo quando duas pessoas reservam simultaneamente.
+A janela manual depende do vínculo operacional completo entre prédio, Rooms e
+Rate Plans; apartamentos incompletos aparecem desabilitados. A reserva direta
+não cria uma reserva no Airbnb/Booking.com nem usa Booking CRS: reduz a
+disponibilidade pelos canais através do worker ARI aprovado.
+
+As reservas permanecem na persistência operacional original durável; não são
+criadas novas tabelas Supabase nem copiados os cadastros Channex para um banco
+paralelo. O pequeno registro privado de operação contém IDs/hash/estado para
+prevenir reenvio duplicado após resposta perdida. Proprietários continuam sem
+acesso às rotas globais de reservas; as permissões antigas de edição de
+acomodações, tarifas e sincronização não foram ampliadas para Funcionário.
+
+O snapshot aprovado de recebimento não guarda valores monetários nem o nome
+detalhado de cada OTA. A interface informa origem Channex ou Manual e usa o ID
+externo disponível; não estima valores nem afirma que esse ID seja o código OTA.
+A consulta não usa a lista geral de bookings ou endpoints bloqueados pelo cliente
+aprovado. Recebimentos pendentes/erros e alterações aguardando envio são exibidos.
+Se a disponibilidade remota falhar, o histórico continua visível e os dias sem
+confirmação mostram um traço. Uma reserva manual não é liberada sem confirmação.
+
+Validação: 204 verificações simuladas passaram, incluindo funcionário criando
+reserva, CSRF, recebimento e ACK, sobreposição, concorrência, repetição, falta de
+vínculo e indisponibilidade remota. A simulação da interface verificou filtros,
+lista/calendário, exclusividade do check-out e o formulário manual. A leitura
+real retornou 3 prédios, 1 apartamento operacional, 1 reserva Channex já recebida,
+zero recebimentos pendentes e zero avisos de disponibilidade. Nenhuma reserva
+real foi criada por estes testes. Todos os arquivos aprovados seguem intactos.
+A inspeção visual ficou pendente por falha do controlador de navegador.
+
+
+CORREÇÃO DA GESTÃO — 25/11/2026
+A tela removia o menu ao chamar installNavigation antes de ter o perfil e não
+reconstruía a navegação depois de carregar as contas. Agora ela primeiro valida
+a sessão e monta o menu com o perfil verificado, preservando o menu mesmo se a
+consulta das contas falhar. Existe também um link inicial para Acomodações.
+
+Ao voltar por histórico/bfcache, os diálogos e controles transitórios são
+restaurados e a sessão/lista são consultadas novamente. O envio de uma ação é
+abortado do lado do navegador ao sair da página e o resultado é conferido na
+lista antes de uma nova ação; não há repetição automática de aprovações.
+As rotas usam o perfil que a validação do cookie já carregou nesta mesma
+requisição, evitando uma leitura duplicada; não existe cache de permissões
+entre requisições. Somente Master altera contas; Admin permanece em consulta,
+conforme a regra existente, e não pode contornar a restrição por chamadas diretas.
+
+Passaram 204 verificações do servidor e o teste simulado completo da interface:
+menu após inicialização e falha de leitura, aprovação por Master, erro de rede,
+retorno ao histórico com diálogo aberto e controles desabilitados, e Admin em
+consulta. Nenhuma conta real foi aprovada, rejeitada, excluída ou alterada pelos
+testes. A API aprovada continua intacta. O controlador de navegador não iniciou,
+portanto a inspeção visual não pôde ser concluída nesta sessão.
+
+
+SUPABASE — CORREÇÃO DA APROVAÇÃO DE CONTAS — 25/11/2026
+O erro real foi confirmado nos logs PostgREST: SQLSTATE 42P17, infinite recursion
+detected in policy for relation profiles, durante PATCH de status pending.
+A política legada profiles_self_update consultava profiles dentro da própria
+verificação de UPDATE. Foi substituída a subconsulta por um helper privado,
+estável e SECURITY DEFINER, sem argumentos, que consulta somente o status do
+usuário autenticado. search_path vazio e execução restrita a authenticated.
+A política mantém a condição de identidade e preservação de status do próprio
+perfil. Os demais guardas RLS e o trigger de permissões não foram alterados.
+Não houve ampliação de permissões de Admin/Funcionário/Proprietário, remoção de
+RLS ou uso de service_role pelo portal.
+
+A migração urban_fix_recursive_profiles_status_policy já foi aplicada no projeto
+conectado. Database/profiles-status-rls.sql documenta a mudança; não execute outra
+vez nesse projeto. A mudança passa a valer no banco sem reiniciar o site.
+
+A verificação real executou RLS com ROLE authenticated: Master aprovou e rejeitou
+uma conta pendente dentro de uma transação; Admin, Funcionário e Proprietário
+não alteraram o status de outra conta. A edição do próprio perfil sem mudança
+de status continuou funcionando. Tudo foi revertido e o fingerprint de todos
+os IDs/status/updated_at permaneceu idêntico antes/depois; permaneceu uma conta
+pendente. O usuário deverá aprová-la pela Gestão quando decidir.
+Limite da verificação SQL: a sessão gerenciada não permite trocar session_user
+para authenticator; os caminhos do trigger dependentes de session_user não foram
+emulados. Esse trigger foi preservado. A autorização Master do portal continua
+coberta pelos testes anteriores. Não houve novos achados de segurança para o
+helper privado. Nenhuma conta real ficou aprovada/rejeitada pelos testes.
+A API aprovada da Channex permaneceu intacta.
+
+
+IDENTIFICAÇÃO DOS APARTAMENTOS NAS RESERVAS — 25/11/2026
+O vínculo operacional do antigo AP Teste havia sido associado ao ID remoto do
+NYC2305. As reservas estavam vinculadas ao ID correto, mas a projeção da tela
+usava o nome operacional antigo. Agora os nomes do apartamento e do prédio são
+resolvidos pelos IDs da Channex, usando o cadastro remoto atual. Se um cadastro
+remoto vinculado não estiver disponível, a tela informa sua indisponibilidade
+em vez de afirmar um nome antigo. Reservas sem ID remoto mantêm o nome histórico.
+Não houve alteração em reservas, vínculos, nomes operacionais, tarifas ou ARI.
+
+A auditoria de leitura identificou envios anteriores de sincronização completa
+com base operacional de 134.00, enquanto a tarifa-base remota do NYC2305 era
+348.00. O usuário informou que a questão dos preços já estava compreendida;
+nenhum valor foi restaurado, estimado ou publicado nesta correção.
+Passaram 207 verificações simuladas. A leitura real verificou 4 reservas e
+retornou zero divergências entre nomes exibidos e Rooms remotos correspondentes.
+Os testes também confirmam preservação dos IDs e dos preços operacionais.
+A API aprovada da Channex permanece integralmente preservada.
+
+
+NAVEGAÇÃO E VÍNCULO OPERACIONAL AUTOMÁTICO — 25/11/2026
+A barra lateral agora tem somente Reservas; dentro dela continuam disponíveis
+Lista e Calendário. Endereços antigos seguem encaminhando para a mesma área.
+Acomodações exibe primeiro os prédios. Clicar em um mostra somente seus
+apartamentos, com botão de retorno e detalhes do prédio. Os botões Adicionar
+prédio e Adicionar apartamento permanecem; ao criar dentro de um prédio ele já
+vem selecionado. Contas de proprietário continuam vendo somente seus Rooms.
+
+O serviço adicional OperationalLinks prepara os vínculos após o cadastro de um
+apartamento, após o salvamento de mapeamento Airbnb e ao Atualizar Channex nas
+reservas. Um worker separado também verifica os cadastros a cada cinco minutos,
+para capturar alterações feitas diretamente na Channex. Não altera o cliente,
+os handlers, workers ou esquema aprovados da Stayline.
+
+A preparação só faz leituras na Channex e grava os vínculos necessários no motor
+operacional existente. Não chama o endpoint antigo de salvar mapping, que
+agenda sincronização completa; não escreve metadados remotos, preços, ARI ou ACK.
+O consumidor original continua responsável por aplicar e confirmar reservas.
+Novos Rooms e tarifas recebem o calendário autoritativo de 500 dias, incluindo
+preços por data, restrições e estoque. Valores não confirmados não são estimados:
+um snapshot incompleto reverte toda a preparação daquele prédio e é tentado
+novamente depois. Tarifas derivadas não suportadas não são copiadas como tarifas
+manuais. Preços e inventários operacionais já existentes são preservados.
+
+O cálculo de capacidade inicial considera as revisões pendentes já persistidas
+pelo feed, para que a aplicação posterior da reserva não desconte o estoque duas
+vezes. O mesmo MutationLock original serializa a gravação com os workers.
+Falhas reais de dados continuam sinalizadas; o aviso deixa de instruir configuração
+manual como etapa normal. Foi criada uma cópia privada de recuperação do banco
+operacional antes de ativar a preparação nesta instalação.
+
+Validação: 222 verificações simuladas passaram, incluindo preparação automática,
+idempotência, ausência de envios ARI, cópia das diárias sem substituição pela base,
+rollback de calendário incompleto, preservação dos valores existentes e estoque
+com reserva pendente aplicado exatamente uma vez pelo consumidor original.
+A simulação de interface confirmou navegação prédio/apartamentos/voltar,
+pré-seleção do prédio no cadastro, acesso restrito de proprietário e menu único.
+Na produção, os 2 Rooms ficaram operacionais, com preços-base existentes
+preservados e zero alterações de saída pendentes após a preparação. A conferência
+real foi de dados e integridade; não houve nova inspeção visual em navegador.
+
+
+EDIÇÃO DE PRÉDIOS — 25/11/2026
+Em Acomodações, abra um prédio e clique em Editar prédio. Master/Admin podem
+atualizar nome, endereço, contatos, descrição, comodidades, informações
+importantes, logo e galeria de até 30 fotos. Dados e imagens atuais são
+carregados diretamente da Channex. É possível adicionar, remover e reordenar
+as fotos; as mantidas preservam seus IDs e metadados. Não há cópia local do
+conteúdo do prédio. As fotos dos Rooms continuam separadas, com limite de 10.
+Moeda, fuso horário, configurações, tarifas, inventário e reservas não são
+modificados por esta edição. Uma mudança concorrente exige reabrir o formulário.
+O salvamento só informa sucesso depois de reler e conferir os dados remotos.
+A edição não publica automaticamente estas imagens nos canais de distribuição.
+Validação atual: 243 verificações simuladas passaram, além das simulações de
+interface de edição e navegação. Nenhum prédio real foi alterado pelos testes.
+A inspeção visual por navegador segue indisponível nesta sessão.
+
+
+AÇÕES NOS CARDS E CONFIGURAÇÕES DO CANAL — 25/11/2026
+Prédios e apartamentos têm menu de três pontos no card. Master/Admin podem
+abrir a edição diretamente. Apartamentos permitem atualizar nome, código,
+quartos, camas, banheiros, descrição, comodidades e fotos (até 10), mantendo
+prédio, capacidade e tarifas. Imagens existentes preservam seus IDs.
+Somente o papel admin pode excluir: master sem admin também não pode. A tela
+exige digitar o nome exato e confirmar a remoção definitiva na Channex. Prédios
+com apartamentos, históricos de reservas e processamento pendente são protegidos.
+A exclusão não usa force; vínculos de canais podem bloquear a remoção na Channex.
+A confirmação remota precede o desligamento dos IDs operacionais; registros
+históricos são preservados. O adaptador adicional impede adotar um Room removido
+entre a leitura inicial e a preparação automática. A fonte aprovada está intacta.
+Funcionários aprovados agora acessam Mapeamento Airbnb e Configurações do canal.
+Podem selecionar os prédios da conexão, pesquisar, selecionar todos e atualizar
+o título. O envio usa somente adapter, título e propriedades: credenciais,
+configurações de preço, moeda, grupo e mapeamentos existentes ficam preservados.
+O salvamento pede confirmação porque a Channex pode sincronizar completamente
+um canal ativo. Prédios com anúncios mapeados não são desmarcados silenciosamente.
+Depois de salvar, o mapeamento recarrega os prédios e apartamentos selecionados.
+Validação atual: 277 verificações simuladas, testes dos menus, edição e exclusão
+na interface simulada e seleção de propriedades do canal. Zero alterações de
+cadastros, canais ou exclusões reais nesta etapa. A inspeção visual em navegador
+foi tentada e falhou por indisponibilidade do ambiente de automação.

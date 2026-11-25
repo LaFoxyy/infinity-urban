@@ -1,0 +1,10 @@
+{
+  "project": "Infinity Urban",
+  "simulatedChecksPassed": 278,
+  "interfaceSimulationsPassed": true,
+  "approvedSourcesUnchanged": 52,
+  "runtimeRelocationByteIntegrity": true,
+  "legacyServerRequired": false,
+  "privateDataExcludedFromPackage": true,
+  "visualBrowserInspection": false
+}

@@ -1,0 +1,335 @@
+{
+  "approvedWorkingFilesUnchanged": 53,
+  "approvedPackagedFilesUnchanged": 52,
+  "simulatedChecksPassed": 277,
+  "productionReadVerified": {
+    "properties": 2,
+    "rooms": 1,
+    "roomFacilities": 191,
+    "client": "original .NET ChannexClient"
+  },
+  "realProductionWrites": {
+    "existingPropertyContentUpdated": 1,
+    "existingRoomContentUpdated": 1,
+    "roomPhotosConfirmed": 6,
+    "newRemoteEntitiesCreated": 0,
+    "ariSent": false
+  },
+  "supabaseOwners": {
+    "tablesCreated": 2,
+    "rlsPolicies": 8,
+    "realRlsProbePassed": true,
+    "persistentTestContacts": 0,
+    "persistentTestLinks": 0
+  },
+  "supabaseAccountAssignments": {
+    "tableCreated": true,
+    "rlsPolicies": 3,
+    "realRlsProbePassed": true,
+    "persistentTestAssignments": 0,
+    "scopedRoomAccessChecksPassed": true
+  },
+  "supabaseExpenses": {
+    "tableCreated": true,
+    "rlsPolicies": 4,
+    "realRlsProbePassed": true,
+    "persistentTestExpenses": 0,
+    "exactCentParsingPassed": true,
+    "channexWrites": 0,
+    "buildingTargetSupported": true,
+    "productionPickerRead": {
+      "properties": 2,
+      "rooms": 1
+    }
+  },
+  "airbnbMapping": {
+    "nativeUi": true,
+    "productionRead": {
+      "channels": 1,
+      "listings": 1,
+      "mapped": 0
+    },
+    "realMappingWrites": 0,
+    "simulatedSavePassed": true,
+    "originalClientUnchanged": true
+  },
+  "reservationsDashboard": {
+    "productionRead": {
+      "properties": 3,
+      "rooms": 1,
+      "reservations": 1,
+      "pendingBookings": 0,
+      "availabilityWarnings": 0
+    },
+    "realReservationsCreated": 0,
+    "employeeManualBookingTested": true,
+    "originalFeedAndAriUsed": true
+  },
+  "managementFix": {
+    "navigationInitializedWithVerifiedMember": true,
+    "approvalUiSimulationPassed": true,
+    "backNavigationAndNetworkRecoveryPassed": true,
+    "masterOnlyAccountWritesPreserved": true,
+    "realAccountsChanged": 0,
+    "profilesRlsRecursionFixed": true,
+    "realApprovalRollbackProbePassed": true
+  },
+  "reservationLabels": {
+    "authoritativeRemoteNames": true,
+    "productionMismatches": 0,
+    "realReservationsChecked": 4,
+    "priceWrites": 0
+  },
+  "automaticOperationalLinks": {
+    "productionReadyRooms": 2,
+    "readOnlyChannexPreparation": true,
+    "existingBasePricesPreserved": true,
+    "pendingOutgoingAfterPreparation": 0,
+    "rollbackOnIncompleteSnapshotTested": true,
+    "pendingBookingStockTested": true
+  },
+  "accommodationNavigation": {
+    "hierarchy": "properties_to_rooms",
+    "singleReservationsMenu": true,
+    "ownerScopePreserved": true
+  },
+  "buildingEditor": {
+    "freshRemoteSnapshot": true,
+    "propertyBoundImageReferences": true,
+    "existingPhotoIdsPreserved": true,
+    "explicitPhotoRemoval": true,
+    "staleWritesRejected": true,
+    "operationalSettingsPreserved": true,
+    "masterAdminOnly": true,
+    "realProductionWrites": 0
+  },
+  "cardActions": {
+    "buildingAndRoomMenus": true,
+    "roomEditing": true,
+    "deletionRole": "admin_only",
+    "typedNameConfirmation": true,
+    "noForceDeletion": true,
+    "operationalHistoryProtected": true,
+    "deletedIdsDetached": true,
+    "staleAdoptionRejected": true,
+    "realProductionDeletes": 0
+  },
+  "channelGeneralSettings": {
+    "staffAccess": true,
+    "propertySelection": true,
+    "mappedPropertyRemovalProtected": true,
+    "credentialsAndMappingsOmittedFromUpdates": true,
+    "realProductionWrites": 0
+  },
+  "browserVisualInspection": false,
+  "originalFiles": [
+    {
+      "path": ".gitignore",
+      "sha256": "8d34bcadc968e07c312969d44179c96ed9d1d001b60b375dda4c7639c9b8047a"
+    },
+    {
+      "path": "Certification-readiness.md",
+      "sha256": "1a4fcdb82fc679dc060b4856e02e0134731f404ba173b7ca33808aad5d15d22f"
+    },
+    {
+      "path": "Certification-retest-guide.md",
+      "sha256": "7956793ce5e612d99d1d6155fe4fe912ca9f8bdb0cc0d778a49cae6065330f02"
+    },
+    {
+      "path": "Certification-retest-results.md",
+      "sha256": "857d652f06746fd6e31a70d2fc0978ae858f46999b939f76929fa9a1d041e37d"
+    },
+    {
+      "path": "Configure-Staging.ps1",
+      "sha256": "a4f15658e60db98161c51db99702cda47fb4c71802f7cda39be79850789286f3"
+    },
+    {
+      "path": "global.json",
+      "sha256": "4961cbcc5507e4420fc17adfe284b44d447a8c92983b8f6fe9eeff7a396d8ab8"
+    },
+    {
+      "path": "LEIA-ME-PRODUCAO.md",
+      "sha256": "929925cea0f60d43ee571e31174e522db74220adf0c707e5f92f042f61494183"
+    },
+    {
+      "path": "README.md",
+      "sha256": "27e00e3a84d63665ee5848f4e65d3eaec0f39c358a7f2d216a6330f8934b52b5"
+    },
+    {
+      "path": "Restart-Stayline.cmd",
+      "sha256": "429e36c0f6bc488a8718943987e63845320f5e5f3863e53513271a5b45caceb0"
+    },
+    {
+      "path": "Start-Stayline.cmd",
+      "sha256": "5953530ccb78b1ea4a8d7feab4d45882c83f6cf3917e9496737b0f98d927ef9c"
+    },
+    {
+      "path": "Start-Stayline.ps1",
+      "sha256": "587ff682164ac3f1d03f24b98778d0d483481a0e0993e58f349fbcbfc17f62cf"
+    },
+    {
+      "path": "Stayline.sln",
+      "sha256": "4e1cf0a1a14defe8a0143f80a16e507f26c3737818e05afd1f7e670a8b441f15"
+    },
+    {
+      "path": "Stop-Stayline.cmd",
+      "sha256": "38c68e9fd4b444847172f5b2c9ca9a6c291a3fffcb1e6406a8ca51bd7e6e709c"
+    },
+    {
+      "path": "Stop-Stayline.ps1",
+      "sha256": "bb261fe820b76f8a868c5134b4027f2e9d1a0f8122a20192d2db4096c11b121e"
+    },
+    {
+      "path": "src/Stayline.Api/AppSchema.cs",
+      "sha256": "2ba13fbb54bd0ac1ee6ab1eaa9fd0a27f98c71ed83598c887ee2127807d51d3c"
+    },
+    {
+      "path": "src/Stayline.Api/appsettings.Development.json",
+      "sha256": "73f95f9e0ceb205fc1c4dc50c07697fcfa29d7087868c2aef1d504cb38c771ec"
+    },
+    {
+      "path": "src/Stayline.Api/appsettings.json",
+      "sha256": "1b591bf76c2bd170d80b1171c2119d36df838c2abac0e885f9b1b737ae925795"
+    },
+    {
+      "path": "src/Stayline.Api/AriFields.cs",
+      "sha256": "c178a7638077a35e9a2c4e58f74c755946794ddf4c42ac0761acac83d709f356"
+    },
+    {
+      "path": "src/Stayline.Api/BookingFeedSnapshot.cs",
+      "sha256": "630cc1db05ee94142ea9f39b72914a073fe1cc4a528f8504eb3559d9efcd7c30"
+    },
+    {
+      "path": "src/Stayline.Api/BookingInboxWorker.cs",
+      "sha256": "118d509596dbc7d91556082d817c6be41c68881f20457379172d3ec4c51aa518"
+    },
+    {
+      "path": "src/Stayline.Api/ChannexClient.cs",
+      "sha256": "1d3c1fef00c26e5a990e8b748c05c3feff9daf601ac2ddee3cd9cbef0ae8d37e"
+    },
+    {
+      "path": "src/Stayline.Api/ChannexEndpoints.cs",
+      "sha256": "4b06d94ab20ab364c9f46e8bd83b21a2e27f7369542e99359b194cc9fc1221e8"
+    },
+    {
+      "path": "src/Stayline.Api/ChannexEnvironmentGuard.cs",
+      "sha256": "faa7f189aa333cae83a85698eba3050612fcd1daa80cd4282cffa59a11d1d0f6"
+    },
+    {
+      "path": "src/Stayline.Api/ChannexSyncWorker.cs",
+      "sha256": "3b2d4ad2a1584cde20a74914f81707032a47e92a0f0819b74eb003a3481ee70a"
+    },
+    {
+      "path": "src/Stayline.Api/Domain.cs",
+      "sha256": "e9020de04ad8c52a56b810db0182c642e00748c8efc891667f75a65daf03fd37"
+    },
+    {
+      "path": "src/Stayline.Api/PmsEndpoints.cs",
+      "sha256": "8540b1e5bc4ef7a636f212fcc23455e22f7dd02a83924cd3044429d356679c55"
+    },
+    {
+      "path": "src/Stayline.Api/PmsService.cs",
+      "sha256": "621e735400c58b4154695d4c0a654cdade418c03064c406f14b6874ccc322a0e"
+    },
+    {
+      "path": "src/Stayline.Api/Program.cs",
+      "sha256": "bb383cb647e3a29c153012eb41092dec022377604886c0d439a745c6b8e92e3b"
+    },
+    {
+      "path": "src/Stayline.Api/StagingImportEndpoints.cs",
+      "sha256": "3841b9783ee04933cfd7074fc0dca05f9e42078f51c7a33249594369653c1c3c"
+    },
+    {
+      "path": "src/Stayline.Api/StagingImportService.cs",
+      "sha256": "52f180c2a257391a276b09152eb4029cde0c664fa533f5065e6006c31c2dafb7"
+    },
+    {
+      "path": "src/Stayline.Api/StagingProvisionEndpoints.cs",
+      "sha256": "8d7476fbb434de4b2b1be0963ae43b12d82187ff33b4096fa9a0ce54bc032105"
+    },
+    {
+      "path": "src/Stayline.Api/StagingProvisionService.cs",
+      "sha256": "eeef02317ee855248eda0d6c90702de294235401eadd974da5fca45187f065cf"
+    },
+    {
+      "path": "src/Stayline.Api/Stayline.Api.csproj",
+      "sha256": "29f1395409123fcd145c5e21d6edc7b12e4748fb08ba657e9161a63147a796ef"
+    },
+    {
+      "path": "src/Stayline.Api/SyncReadiness.cs",
+      "sha256": "d334bef65af411543621a76bc70ed62e3c2edf074f6fba96bec0cb4cfed72917"
+    },
+    {
+      "path": "src/Stayline.Api/Properties/launchSettings.json",
+      "sha256": "767bc73837f33e909a064bed245b503ca5ee331b4f446a5f6365ed55a13f2d57"
+    },
+    {
+      "path": "src/Stayline.Api/wwwroot/app.js",
+      "sha256": "345f403fc8e3d3f2cf15a545d8d0bbf30d93ee59533b71ff2f44ef856047e65c"
+    },
+    {
+      "path": "src/Stayline.Api/wwwroot/index.html",
+      "sha256": "826f878abc55bc563302bcd32899a88bf5c76a10f9c124dd2f8513f12b109508"
+    },
+    {
+      "path": "src/Stayline.Api/wwwroot/styles.css",
+      "sha256": "9bd831ade0c4243d21028a926b0979aab565e283ee54416636f8d74357eea160"
+    },
+    {
+      "path": "tests/Stayline.Checks/BookingChecks.cs",
+      "sha256": "36b3b8d59788fa578417dd66afb4dbad0f34f50b61f3e76e17edf100ac8fd5e3"
+    },
+    {
+      "path": "tests/Stayline.Checks/DeltaChecks.cs",
+      "sha256": "2b7499c8951311b8f0207ee5d36f7ab9ffca47c3bd42b07dd0948fbe0ad61aa0"
+    },
+    {
+      "path": "tests/Stayline.Checks/DomainChecks.cs",
+      "sha256": "e49e596d2414d3ad58683a04e4cb2f4c123ba6d80ded3c28a65b2d0ef473edcf"
+    },
+    {
+      "path": "tests/Stayline.Checks/HttpChecks.cs",
+      "sha256": "ea4e26caffcb4ed59925dfa140702ab02e9ac3f284f0a06908a71d9b2ee8080b"
+    },
+    {
+      "path": "tests/Stayline.Checks/IncomingHttpChecks.cs",
+      "sha256": "ef43fbb469ef7489b20ef19cef491c7e8a88a8ab0a82cc8839462865c38c7d71"
+    },
+    {
+      "path": "tests/Stayline.Checks/IntegrationChecks.cs",
+      "sha256": "11637ae9575f730b698b8307cef6c1aa76f57f7130c9ccbfe110550dff13a10d"
+    },
+    {
+      "path": "tests/Stayline.Checks/OnboardingChecks.cs",
+      "sha256": "19d46f404f3952b86f9c600d86739e3b7b51c603f52401b9169d7d8f724a2070"
+    },
+    {
+      "path": "tests/Stayline.Checks/ProductionEnvironmentChecks.cs",
+      "sha256": "7b178e6f1968c36623f86bfa29b75979eb3ea7f6cc27ca021da2bf89e28e344d"
+    },
+    {
+      "path": "tests/Stayline.Checks/Program.cs",
+      "sha256": "5d175b26ee1ff733806704298d94acea798331824bcb0b2797b97b3512169c80"
+    },
+    {
+      "path": "tests/Stayline.Checks/ProvisioningChecks.cs",
+      "sha256": "b9f910f9216f90aeb9ddd3da5d89433b40bf83ee439336c340f04f15ab447e08"
+    },
+    {
+      "path": "tests/Stayline.Checks/SchemaChecks.cs",
+      "sha256": "c69ab8bcef3968debaec3f0792004f56b629cc2faa3870ce7e4c35fae3bd1c14"
+    },
+    {
+      "path": "tests/Stayline.Checks/Stayline.Checks.csproj",
+      "sha256": "fe448f9eee9a313e574e0dc9f0fe8191f85af238eb9216930358c81fa3bd448c"
+    },
+    {
+      "path": "tests/Stayline.Checks/TestSupport.cs",
+      "sha256": "60e5946090e43451fbfac997ab9c5bc304e62c4a6e8508543483c49b32b2396f"
+    },
+    {
+      "path": "EXTRACAO-VERIFICACAO.json",
+      "sha256": "30c21813314ac08ec59e5a3917a136390c14c1dabbf74c40c4ea4324341270bd"
+    }
+  ]
+}

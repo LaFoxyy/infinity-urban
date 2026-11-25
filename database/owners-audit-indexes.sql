@@ -1,0 +1,2 @@
+create index urban_channex_owners_creator_idx on public.urban_channex_owners(created_by);
+create index urban_channex_room_owners_creator_idx on public.urban_channex_room_owners(created_by);

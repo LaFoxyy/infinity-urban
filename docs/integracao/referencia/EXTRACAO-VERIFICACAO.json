@@ -1,0 +1,52 @@
+{
+  "Date": "2026-11-10",
+  "SourceSnapshot": "Stayline-source.zip (2026-11-03)",
+  "Scope": "Standalone Stayline certified PMS with existing production environment support",
+  "Destination": "https://app.channex.io/api/v1/",
+  "ChecksPassed": 57,
+  "ChecksTotal": 57,
+  "BuildPassed": true,
+  "OriginalCertifiedFiles": [
+    {
+      "File": "src/Stayline.Api/PmsService.cs",
+      "SHA256": "621E735400C58B4154695D4C0A654CDADE418C03064C406F14B6874CCC322A0E",
+      "MatchesApprovedSnapshot": true
+    },
+    {
+      "File": "src/Stayline.Api/AriFields.cs",
+      "SHA256": "C178A7638077A35E9A2C4E58F74C755946794DDF4C42AC0761ACAC83D709F356",
+      "MatchesApprovedSnapshot": true
+    },
+    {
+      "File": "src/Stayline.Api/ChannexSyncWorker.cs",
+      "SHA256": "3B2D4AD2A1584CDE20A74914F81707032A47E92A0F0819B74EB003A3481EE70A",
+      "MatchesApprovedSnapshot": true
+    },
+    {
+      "File": "src/Stayline.Api/BookingInboxWorker.cs",
+      "SHA256": "118D509596DBC7D91556082D817C6BE41C68881F20457379172D3EC4C51AA518",
+      "MatchesApprovedSnapshot": true
+    },
+    {
+      "File": "src/Stayline.Api/BookingFeedSnapshot.cs",
+      "SHA256": "630CC1DB05EE94142EA9F39B72914A073FE1CC4A528F8504EB3559D9EFCD7C30",
+      "MatchesApprovedSnapshot": true
+    },
+    {
+      "File": "src/Stayline.Api/ChannexEndpoints.cs",
+      "SHA256": "4B06D94AB20AB364C9F46E8BD83B21A2E27F7369542E99359B194CC9FC1221E8",
+      "MatchesApprovedSnapshot": true
+    }
+  ],
+  "OriginalInterfaceUnchanged": true,
+  "ProductionClientMatchesExisting": true,
+  "ActiveProjectUnchanged": true,
+  "ActiveFilesCompared": 590,
+  "NoUrbanInfinityOrSupabase": true,
+  "NoDatabaseOrMappingsIncluded": true,
+  "RealChannexRequestsMade": false,
+  "PrivateConfigurationIncluded": "src/Stayline.Api/.local/production-secrets.json",
+  "CredentialsOutsidePrivateConfiguration": 0,
+  "Startup": "Start-Stayline.cmd",
+  "LocalUrl": "http://127.0.0.1:5080"
+}

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1017"><meta name="description" content="Infinity Urban — Gestão de contas e permissões.">
+  <title>Proprietários — Infinity Urban</title>
+  <link rel="icon" type="image/png" href="/assets/urban-infinity-icon-dark.png">
+  <link rel="stylesheet" href="/management.css"><link rel="stylesheet" href="/accommodations.css"><link rel="stylesheet" href="/owners.css"><script type="module" src="/owners.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Ir para o conteúdo</a>
+  <button class="sidebar-backdrop" id="sidebar-backdrop" aria-label="Fechar navegação" hidden></button>
+  <aside class="sidebar" id="sidebar" aria-label="Navegação principal">
+    <a class="brand" href="/acomodacoes" aria-label="Infinity Urban"><img id="brand-icon" src="/assets/urban-infinity-icon-dark.png" width="36" height="36" alt=""><span><strong>Infinity Urban</strong><small>GESTÃO DE PROPRIEDADES</small></span></a>
+    <nav aria-label="Seções do portal"></nav>
+  </aside>
+  <div class="main-shell">
+    <header class="topbar">
+      <div class="topbar-left"><button class="icon-button" id="toggle-sidebar" aria-label="Recolher navegação" aria-controls="sidebar" aria-expanded="true" data-icon="panel"></button><button class="updated-at" id="refresh" title="Atualizar lista de contas">Última atualização: <strong id="updated-at">—</strong></button></div>
+      <div class="topbar-right">
+        <label class="language"><span data-icon="languages"></span><span class="sr-only">Idioma</span><select aria-label="Idioma" id="language"><option value="pt-BR">BR Português</option><option value="en">EN English</option><option value="es">ES Español</option></select></label>
+        <button class="icon-button" id="theme-toggle" aria-label="Ativar tema claro" data-icon="sun"></button>
+        <button class="icon-button" id="notifications-toggle" aria-label="Notificações" aria-expanded="false" data-icon="bell"></button>
+        <div class="account-menu"><button class="account" id="account-toggle" aria-expanded="false"><span class="avatar" id="avatar">U</span><span class="account-details"><strong id="account-name">Carregando…</strong><small id="account-role">—</small></span></button><div class="popover" id="account-popover" hidden><p id="account-email"></p><button id="logout" data-icon="logout"><span>Sair da conta</span></button></div></div>
+        <div class="popover notifications" id="notifications-popover" hidden><strong>Notificações</strong><p>O centro de notificações estará disponível em uma próxima etapa.</p></div>
+      </div>
+    </header>
+
+<main id="main-content" class="owners-page" tabindex="-1"><div class="accommodation-heading"><div class="page-heading"><h1>Proprietários</h1><p id="owner-count">Carregando proprietários…</p></div><div class="heading-actions"><button id="reload-owners" class="outline-button">Atualizar</button><button id="add-owner" class="primary-button" hidden>+ Cadastrar proprietário</button></div></div><label for="owner-search" class="sr-only">Buscar proprietário ou apartamento</label><input type="search" id="owner-search" class="owner-search" placeholder="Buscar proprietário ou apartamento…"><div class="owner-alphabet" id="owner-alphabet" aria-label="Filtrar por inicial"></div><p id="owners-error" class="dialog-error" role="alert" hidden></p><p id="rooms-error" class="dialog-error" role="alert" hidden></p><div id="owners-grid" class="owners-grid" aria-live="polite"></div></main></div><div class="toast" id="toast" role="status" hidden></div></body></html>

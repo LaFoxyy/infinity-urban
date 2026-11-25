@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#122e35">
+  <title>Stayline · Property operations</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js?v=20261103-reservations"></script>
+</head>
+<body>
+  <aside class="sidebar" aria-label="Main navigation">
+    <a class="brand" href="#calendar" aria-label="Stayline home"><span class="brand-mark" aria-hidden="true">s</span>stayline<span class="brand-dot">.</span></a>
+    <div class="workspace-tag"><span class="workspace-icon">S</span><div>Your workspace<small>Property operations</small></div></div>
+    <p class="nav-label">WORKSPACE</p>
+    <nav id="navigation">
+      <button data-view="calendar" class="nav-button active"><span data-icon="calendar"></span>Calendar</button>
+      <button data-view="reservations" class="nav-button"><span data-icon="reservation"></span>Reservations</button>
+      <button data-view="properties" class="nav-button"><span data-icon="building"></span>Properties</button>
+      <button data-view="connection" class="nav-button"><span data-icon="connection"></span>Channex & sync<span class="nav-count" id="pending-count" hidden>0</span></button>
+    </nav>
+    <div class="sidebar-bottom"><div class="environment"><span class="environment-dot"></span>STAGING WORKSPACE</div><p>Build your operations.<br>Connect your distribution.</p><div class="sidebar-version">Stayline <span>Pre-alpha</span></div></div>
+  </aside>
+  <div class="main-shell">
+    <header class="topbar">
+      <div class="property-switch"><span data-icon="building"></span><label class="sr-only" for="property-select">Active property</label><select id="property-select"><option value="">No properties yet</option></select></div>
+      <div class="topbar-right"><span class="staging-pill">Staging</span><button class="icon-button" id="refresh-button" title="Refresh current view" aria-label="Refresh current view"><span data-icon="refresh"></span></button><span class="avatar" title="Local workspace">S</span></div>
+    </header>
+    <main id="main-content" tabindex="-1">
+      <div class="page-heading"><div><p class="eyebrow" id="page-eyebrow">YOUR OPERATIONS, IN SYNC</p><h1 id="page-title">Availability & rates</h1><p class="page-subtitle" id="page-subtitle">A clear view of every room, rate and date.</p></div><div id="page-actions" class="page-actions"></div></div>
+      <div id="global-alert" class="alert error" role="alert" hidden></div>
+      <section id="view-content" aria-live="polite"><div class="loading-state"><span class="spinner"></span>Opening your workspace…</div></section>
+      <footer class="page-footer"><span>STAYLINE / PROPERTY OPERATIONS</span><span id="footer-status">Connecting to your server…</span></footer>
+    </main>
+  </div>
+  <div id="toast-region" class="toast-region" aria-live="polite"></div>
+  <dialog id="modal"><div class="modal-head"><div><p class="eyebrow" id="modal-eyebrow">WORKSPACE</p><h2 id="modal-title"></h2></div><button class="icon-button" id="modal-close" aria-label="Close dialog"><span data-icon="close"></span></button></div><div id="modal-content"></div></dialog>
+</body>
+</html>

@@ -1,0 +1,4 @@
+bin/
+obj/
+.local/
+App_Data/

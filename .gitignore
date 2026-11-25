@@ -1,0 +1,16 @@
+**/bin/
+**/obj/
+**/.local/
+**/App_Data/
+.vs/
+dist/
+.env
+.env.*
+!.env.example
+secrets.json
+*.secrets.json
+*.log
+*.user
+*.db
+*.db-shm
+*.db-wal

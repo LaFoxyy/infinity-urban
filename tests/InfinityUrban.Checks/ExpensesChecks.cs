@@ -1,0 +1,38 @@
+using System.Net;
+using System.Text.Json;
+using InfinityUrban.Web;
+static class ExpensesChecks
+{
+ public static async Task Run(HttpClient client,FakeSupabase auth,UnifiedTransport remote,Action<bool,string> check,Func<Task<string>> token,Func<string,object,string?,Task<HttpResponseMessage>> post)
+ {
+  auth.CurrentRole="master";var csrf=await token();var remoteWrites=remote.Writes.Count;var input=new ExpenseInput(Guid.NewGuid(),"Condomínio","monthly",18001,"BRL",FakeSupabase.ExpenseCategoryId,Guid.Parse(UnifiedTransport.ExistingRoom),"2026-11-01","2027-02-01","Despesa de teste");
+  check((await client.GetAsync("/despesas-recorrentes")).IsSuccessStatusCode,"Approved team may open the expenses page");var before=auth.ExpenseWrites;
+  check((await post("/api/expenses",input,null)).StatusCode==HttpStatusCode.BadRequest&&auth.ExpenseWrites==before,"Expense changes without CSRF cannot reach Supabase");
+  using var created=await post("/api/expenses",input,csrf);using var createdDoc=JsonDocument.Parse(await created.Content.ReadAsStringAsync());var revision=createdDoc.RootElement.GetProperty("revision").GetGuid();check(created.IsSuccessStatusCode&&createdDoc.RootElement.GetProperty("amountCents").GetInt64()==18001&&createdDoc.RootElement.GetProperty("propertyId").GetGuid()==Guid.Parse(UnifiedTransport.ExistingProperty),"Monthly expense saves exact cents in Supabase and verifies the Room parent through Channex");
+  check((await post("/api/expenses",input,csrf)).IsSuccessStatusCode,"Retrying an expense save does not duplicate the record");
+  var general=input with{Id=Guid.NewGuid(),Name="Despesa geral",RoomTypeId=null,CategoryId=null};check((await post("/api/expenses",general,csrf)).IsSuccessStatusCode,"A monthly expense may exist without an apartment or category");
+  var once=input with{Id=Guid.NewGuid(),Name="Reparo avulso",Kind="one_off",StartDate="2026-11-17",EndDate=null};check((await post("/api/expenses",once,csrf)).IsSuccessStatusCode,"One-off expense can be linked to a Room on a single date");
+  check((await post("/api/expenses",once with{Id=Guid.NewGuid(),RoomTypeId=null,Name="Compra geral avulsa"},csrf)).IsSuccessStatusCode,"One-off expense can also have no apartment");
+  check((await post("/api/expenses",input with{Id=Guid.NewGuid(),Name="Limpeza por estadia",Kind="per_stay",EndDate=null},csrf)).IsSuccessStatusCode,"Per-stay rule supports an open-ended effective period");
+  using(var listed=await client.GetAsync("/api/expenses")){using var data=JsonDocument.Parse(await listed.Content.ReadAsStringAsync());check(data.RootElement.GetProperty("expenses").GetArrayLength()==5&&data.RootElement.GetProperty("categories")[0].GetProperty("label").GetString()=="Limpeza","Expenses listing reads every capped page and the shared Supabase category dictionary");}
+  before=auth.ExpenseWrites;
+  foreach(var invalid in new[]{input with{Id=Guid.NewGuid(),AmountCents=0},input with{Id=Guid.NewGuid(),AmountCents=-1},input with{Id=Guid.NewGuid(),AmountCents=100000000000},input with{Id=Guid.NewGuid(),StartDate="2026-11-15"},input with{Id=Guid.NewGuid(),EndDate="2026-10-01"},once with{Id=Guid.NewGuid(),EndDate="2026-11-18"},input with{Id=Guid.NewGuid(),Currency="JPY"},input with{Id=Guid.NewGuid(),CategoryId=Guid.NewGuid()}})check((await post("/api/expenses",invalid,csrf)).StatusCode==HttpStatusCode.BadRequest,"Invalid expense value, currency, category or date is rejected");
+  check(auth.ExpenseWrites==before,"Rejected expenses cannot produce partial database writes");
+  check((await post("/api/expenses",input with{Id=Guid.NewGuid(),Currency="USD"},csrf)).StatusCode==HttpStatusCode.BadRequest,"Expense currency must match the chosen apartment");
+  using var edited=await post("/api/expenses",input with{Name="Condomínio atualizado",AmountCents=25099,ExpectedRevision=revision},csrf);using var editedDoc=JsonDocument.Parse(await edited.Content.ReadAsStringAsync());var next=editedDoc.RootElement.GetProperty("revision").GetGuid();check(edited.IsSuccessStatusCode&&next!=revision,"Editing an expense preserves exact cents and advances the revision");
+  check((await post("/api/expenses",input with{ExpectedRevision=revision},csrf)).StatusCode==HttpStatusCode.Conflict,"Stale editing cannot overwrite a newer expense");
+  check((await post($"/api/expenses/{input.Id}/delete",new ExpenseDelete(revision),csrf)).StatusCode==HttpStatusCode.Conflict,"Stale deletion cannot remove a modified expense");
+  auth.CurrentRole="funcionario";before=auth.ExpenseWrites;check((await client.GetAsync("/api/expenses")).IsSuccessStatusCode,"Internal staff may consult expenses");check((await post("/api/expenses",general with{Id=Guid.NewGuid()},csrf)).StatusCode==HttpStatusCode.Forbidden&&auth.ExpenseWrites==before,"Staff cannot create or alter expense rules");
+  auth.CurrentRole="proprietario";check((await client.GetAsync("/api/expenses")).StatusCode==HttpStatusCode.Forbidden&&(await client.GetAsync("/despesas-recorrentes")).StatusCode==HttpStatusCode.Forbidden,"Owner accounts cannot read expenses, including those assigned to their Rooms");
+  check((await post("/api/expenses",general,csrf)).StatusCode==HttpStatusCode.Forbidden,"An owner cannot write financial data through a direct request");
+  auth.CurrentRole="admin";check((await post($"/api/expenses/{input.Id}/delete",new ExpenseDelete(next),csrf)).IsSuccessStatusCode,"Approved Admin may delete a current expense record");
+  using(var response=await client.GetAsync("/api/expenses/catalog")){using var data=JsonDocument.Parse(await response.Content.ReadAsStringAsync());check(response.IsSuccessStatusCode&&data.RootElement.GetProperty("rooms").GetArrayLength()>0&&data.RootElement.GetProperty("properties").GetArrayLength()>0,"Expense picker loads real Channex building and apartment collections independently of full metadata");}
+  var building=general with{Id=Guid.NewGuid(),Name="Conta do prédio",PropertyId=Guid.Parse(UnifiedTransport.ExistingProperty)};
+  using(var response=await post("/api/expenses",building,csrf)){using var data=JsonDocument.Parse(await response.Content.ReadAsStringAsync());check(response.IsSuccessStatusCode&&data.RootElement.GetProperty("roomTypeId").ValueKind==JsonValueKind.Null&&data.RootElement.GetProperty("propertyId").GetGuid()==building.PropertyId,"Building expense saves only its Channex property ID in Supabase");var rev=data.RootElement.GetProperty("revision").GetGuid();using var changed=await post("/api/expenses",building with{PropertyId=null,RoomTypeId=input.RoomTypeId,ExpectedRevision=rev},csrf);using var changedData=JsonDocument.Parse(await changed.Content.ReadAsStringAsync());check(changed.IsSuccessStatusCode&&changedData.RootElement.GetProperty("roomTypeId").GetGuid()==input.RoomTypeId,"Building expense may be reassigned to an apartment");}
+  check((await post("/api/expenses",building with{Id=Guid.NewGuid(),RoomTypeId=input.RoomTypeId},csrf)).StatusCode==HttpStatusCode.BadRequest,"Ambiguous simultaneous building and apartment inputs are rejected");
+  check((await post("/api/expenses",building with{Id=Guid.NewGuid(),Currency="USD"},csrf)).StatusCode==HttpStatusCode.BadRequest,"Building expense must match verified Channex currency");
+  check((await post("/api/expenses",building with{Id=Guid.NewGuid(),PropertyId=Guid.NewGuid()},csrf)).StatusCode==HttpStatusCode.NotFound,"Unknown Channex building cannot be linked");
+  auth.CurrentRole="proprietario";check((await client.GetAsync("/api/expenses/catalog")).StatusCode==HttpStatusCode.Forbidden,"Owner cannot bypass internal access through the expense picker");auth.CurrentRole="master";
+  check(remote.Writes.Count==remoteWrites,"Expense operations never change Channex metadata, prices, bookings or ARI");auth.CurrentRole="master";
+ }
+}
