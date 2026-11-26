@@ -1,38 +1,30 @@
 # Infinity Urban
 
-Dashboard interno de gestão de acomodações, contas, proprietários, despesas e reservas, integrado à Channex de produção e ao Supabase.
+O **Infinity Urban** é o painel de gestão que reúne o acompanhamento dos apartamentos e a rotina da equipe em um único ambiente. Da organização das acomodações à análise dos resultados, a plataforma conecta as informações necessárias para cuidar da operação e acompanhar o desempenho de cada unidade.
 
-Para abrir o site nesta máquina, dê dois cliques em **Iniciar.cmd**. O endereço é [localhost:5189](http://localhost:5189/login). Se já estiver aberto, o inicializador reutiliza a instância existente.
+Os prédios organizam os apartamentos, as reservas mostram a ocupação e os relatórios ajudam a entender os resultados de cada período. Proprietários e funcionários têm acesso ao Dashboard e aos Relatórios dos apartamentos designados às suas contas.
 
-## Estrutura
+## Dentro da plataforma
 
-| Pasta | Conteúdo |
+| Área | O que você encontra |
 | --- | --- |
-| `src/InfinityUrban.Web` | Aplicação, telas, autenticação e funcionalidades do dashboard |
-| `src/InfinityUrban.Channex` | Módulo interno com o transporte, os serviços e os workers da integração preservada |
-| `tests/InfinityUrban.Checks` | Verificações de comportamento, permissões e integração simulada |
-| `database` | Scripts SQL do Supabase |
-| `docs` | Arquitetura, integridade e histórico técnico |
-| `tools` | Ferramentas de validação e empacotamento |
+| **Dashboard** | Indicadores de receita, ocupação e diária média, com gráficos e rankings dos dez maiores e menores desempenhos. |
+| **Acomodações** | Prédios e seus apartamentos organizados, com informações, descrições, fotos e edição dos cadastros. |
+| **Reservas** | Visualização em lista ou calendário, consulta dos períodos de ocupação e cadastro de reservas manuais. |
+| **Proprietários** | Contatos organizados e vinculados aos respectivos apartamentos. |
+| **Despesas** | Lançamentos mensais, por estadia ou avulsos, organizados por categoria e vinculados a apartamentos, prédios ou sem vínculo específico. |
+| **Relatórios** | Resultados consolidados ou por apartamento, com filtros de período, exportação em CSV e impressão para salvar em PDF. |
+| **Designações** | Distribuição dos apartamentos entre contas de proprietários e funcionários, definindo o alcance do Dashboard e dos Relatórios. |
+| **Gestão** | Administração de contas, aprovação de acessos e definição das funções da equipe. |
 
-**InfinityUrban.slnx** abre toda a solução. Há uma única aplicação web e um único servidor; o módulo Channex é uma biblioteca interna, sem inicialização independente.
+## Uma visão da operação e dos resultados
 
-## Configuração local
+No dia a dia, a equipe pode consultar as reservas, atualizar os dados das acomodações e organizar as despesas. Para acompanhar os resultados, o Dashboard permite comparar apartamentos e identificar diferenças de receita e ocupação ao longo do período selecionado.
 
-Requer .NET 10. As configurações privadas, os dados operacionais e os registros desta instalação ficam em `src/InfinityUrban.Web/.local`, fora dos arquivos públicos e do pacote de distribuição. A reorganização preservou os dados e as configurações existentes.
+Os Relatórios complementam essa visão com consultas individuais ou consolidadas. Assim, é possível analisar um apartamento específico ou reunir os resultados da carteira em um documento para consulta e compartilhamento.
 
-A chave Channex permanece no arquivo privado `.local/channex-secrets.json`. Credenciais privilegiadas não devem ser colocadas no código ou no navegador. O Supabase mantém a configuração pública da autenticação; a chave Channex fica no servidor.
+## Cada conta com seu espaço
 
-## Verificação e entrega
+A administração mantém a visão geral da carteira e define quais apartamentos ficam sob a responsabilidade de cada proprietário ou funcionário. Uma mesma conta pode receber mais de uma unidade; o Dashboard, os Relatórios e suas exportações respeitam essas designações.
 
-Execute `Validar.ps1` para compilar e rodar as verificações simuladas, os testes de interface e a conferência dos arquivos da integração. Node.js e Python são usados por essas ferramentas; para iniciar o site, basta o .NET.
-
-Execute `python tools/package.py` na pasta do projeto para gerar `dist/Infinity-Urban.zip`, sem dados locais, chaves, históricos de execução ou arquivos de compilação. Os scripts SQL são documentação de implantação e não são executados automaticamente.
-
-As versões anteriores e os protótipos foram preservados em **Arquivo**, ao lado desta pasta. Essa pasta é um arquivo privado de desenvolvimento e não faz parte do produto ativo.
-
-## Publicação no servidor
-
-O [guia do Portainer](docs/portainer.md) descreve a implantação exclusiva de `infinityboard.urbaninfinity.com.br`. O Dockerfile e o workflow GitHub preparam e testam a imagem fora do servidor do cliente. A stack está em `deploy/portainer-stack.yml`.
-
-O workflow não aciona o servidor enquanto o webhook exclusivo da nossa aplicação não for configurado como segredo no GitHub. A primeira publicação exige restaurar os dados operacionais no volume próprio antes de habilitar a Channex.
+As informações de despesas ficam disponíveis à equipe interna, enquanto os proprietários acompanham o desempenho dos apartamentos aos quais têm acesso.
