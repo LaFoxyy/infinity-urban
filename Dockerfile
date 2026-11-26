@@ -28,5 +28,5 @@ USER $APP_UID
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
     CMD curl --fail --silent --show-error --max-time 4 \
-    -H 'Host: infinityboard.urbaninfinity.com.br' http://127.0.0.1:8080/health/live || exit 1
+    -H 'Host: app.urbaninfinity.com.br' http://127.0.0.1:8080/health/live || exit 1
 ENTRYPOINT ["dotnet", "InfinityUrban.Web.dll"]

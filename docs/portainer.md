@@ -4,7 +4,7 @@ Status: preparação local. Nenhuma stack, serviço, volume, rede, segredo ou en
 
 ## Escopo e dados confirmados
 
-Somente infinityboard.urbaninfinity.com.br e uma stack nova chamada infinityboard. Preservar o domínio principal, LP, demais subdomínios e stacks, inclusive urban_infinit_gestor e traefik. Não modificar o proxy global.
+Somente app.urbaninfinity.com.br e o alias anterior infinityboard.urbaninfinity.com.br, ambos na mesma stack infinityboard. Preservar o domínio principal, LP, demais subdomínios e stacks, inclusive urban_infinit_gestor e traefik. Não modificar o proxy global.
 
 Confirmado nas capturas: Swarm, nó infinityServer, Traefik v2.11.2, rede externa infinityNet (10.0.1.0/24), entrada websecure e emissor letsencryptresolver. Nosso label usa infinityNet; não vamos corrigir o label network_public do outro sistema.
 
@@ -36,7 +36,7 @@ Alterar somente o registro DNS infinityboard na Hostinger para o IP público con
 
 A stack fixa uma réplica no nó infinityServer, limite de 0,5 CPU/512 MiB, reserva de 128 MiB e logs com rotação. Não publica portas do host, não tem rede host, privilégios elevados nem socket Docker. Os limites iniciais precisam de observação sob carga real.
 
-A regra Traefik é exata para infinityboard.urbaninfinity.com.br. Nosso adaptador aceita HTTPS/IP encaminhados apenas da rede confirmada 10.0.1.0/24 e não reescreve o host por cabeçalho encaminhado.
+A regra Traefik aceita exatamente app.urbaninfinity.com.br e infinityboard.urbaninfinity.com.br durante a transição. Nosso adaptador aceita HTTPS/IP encaminhados apenas da rede confirmada 10.0.1.0/24 e não reescreve o host por cabeçalho encaminhado.
 
 Após conferir restauração, acesso, domínio e HTTPS, habilitar INFINITYBOARD_CHANNEX_ENABLED=true somente na nossa stack. Confirmar reservas e sincronização mantendo a instalação local de produção parada.
 
@@ -49,3 +49,16 @@ A automação usa a tag exata do commit e confere a versão em /health/live. A t
 Se a nova versão não for confirmada, o workflow falha e solicita conferir somente nosso serviço. Não reinicia o servidor, não altera outras stacks e não repete cegamente o acionamento.
 
 Referências: https://doc.traefik.io/traefik/v2.11/routing/providers/docker/ e https://docs.portainer.io/user/docker/services/webhooks
+
+
+## Troca de endereço para app.urbaninfinity.com.br
+
+A aplicação, o serviço `infinityboard_web`, o volume e o segredo permanecem os mesmos. Não criar outra instância, copiar o banco ou mudar o proxy global.
+
+1. Criar na Hostinger somente o registro A `app`, apontando para `5.161.217.98`, com TTL 300. Se houver registro existente para esse nome, confirmar seu destino antes de substituir.
+2. No Editor da stack **infinityboard já existente**, alterar apenas `AllowedHosts` para `"app.urbaninfinity.com.br;infinityboard.urbaninfinity.com.br"` e a label do router para ``traefik.http.routers.infinityboard.rule=Host(`app.urbaninfinity.com.br`) || Host(`infinityboard.urbaninfinity.com.br`)``. Preservar todas as outras linhas, especialmente a imagem atualmente publicada, Channex habilitada, volume, segredo e limites.
+3. Atualizar somente essa stack. O nome antigo continua atendido, inclusive para a verificação de saúde da imagem anterior.
+4. Confirmar `https://app.urbaninfinity.com.br/health/live` e o login antes de enviar a alteração do workflow ao GitHub. As próximas imagens e a confirmação de publicação usam o novo host.
+5. Entrar novamente no endereço novo: a sessão do navegador é específica do endereço. Não remover o registro antigo durante a validação. A retirada do alias fica para uma etapa posterior.
+
+O webhook de atualização do serviço no Portainer não precisa mudar. Nenhuma alteração deve ser feita nos registros `@`, `www`, demais subdomínios, stack Traefik ou stacks de outros produtos.

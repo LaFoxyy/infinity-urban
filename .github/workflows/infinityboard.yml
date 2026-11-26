@@ -73,11 +73,11 @@ jobs:
               --mount source=infinityboard-ci-data,target=/app/.local \
               -e Channex__Enabled=false \
               -e Hosting__ProxyNetwork="$PROXY_CIDR" \
-              -e AllowedHosts=infinityboard.urbaninfinity.com.br "$IMAGE"
+              -e AllowedHosts=app.urbaninfinity.com.br "$IMAGE"
           }
           wait_app() {
             for attempt in $(seq 1 45); do
-              if curl -fsS --max-time 3 -H 'Host: infinityboard.urbaninfinity.com.br' http://127.0.0.1:18089/health/live > /tmp/infinityboard-health.json; then
+              if curl -fsS --max-time 3 -H 'Host: app.urbaninfinity.com.br' http://127.0.0.1:18089/health/live > /tmp/infinityboard-health.json; then
                 python3 -c 'import json,os; h=json.load(open("/tmp/infinityboard-health.json")); assert h["status"]=="up" and h["version"]==os.environ["GITHUB_SHA"]'
                 return 0
               fi
@@ -92,7 +92,7 @@ jobs:
           docker exec infinityboard-smoke sh -c 'test -f /app/.local/runtime/production/stayline.db && printf preserved > /app/.local/ci-marker'
           python3 <<'PY'
           import json,urllib.request
-          headers={'Host':'infinityboard.urbaninfinity.com.br','X-Forwarded-Proto':'https','X-Forwarded-For':'198.51.100.25'}
+          headers={'Host':'app.urbaninfinity.com.br','X-Forwarded-Proto':'https','X-Forwarded-For':'198.51.100.25'}
           with urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:18089/api/auth/form',headers=headers),timeout=10) as response:
               form=json.load(response)
               cookies=response.headers.get_all('Set-Cookie') or []
@@ -108,7 +108,7 @@ jobs:
           python3 <<'PY'
           import json,urllib.request,urllib.error
           form=json.load(open('/tmp/infinityboard-form.json'))
-          headers={'Host':'infinityboard.urbaninfinity.com.br','X-Forwarded-Proto':'https','X-Forwarded-For':'198.51.100.25','Content-Type':'application/json','Cookie':form['cookie'],'X-CSRF-Token':form['csrf']}
+          headers={'Host':'app.urbaninfinity.com.br','X-Forwarded-Proto':'https','X-Forwarded-For':'198.51.100.25','Content-Type':'application/json','Cookie':form['cookie'],'X-CSRF-Token':form['csrf']}
           request=urllib.request.Request('http://127.0.0.1:18089/api/auth/login',headers=headers,data=json.dumps({'email':'invalid','password':''}).encode())
           try:urllib.request.urlopen(request,timeout=10);raise AssertionError('Invalid form unexpectedly succeeded')
           except urllib.error.HTTPError as response:
@@ -152,7 +152,7 @@ jobs:
           try{const response=await fetch(url,{method:'POST',redirect:'error',signal:AbortSignal.timeout(30000)});if(!response.ok)fail('O Portainer nao confirmou a solicitacao. Confira somente o servico Infinityboard.');}catch{fail('O acionamento nao foi confirmado; confira o servico antes de repetir.');}
           let confirmed=false;
           for(let attempt=0;attempt<30;attempt++){
-            try{const response=await fetch('https://infinityboard.urbaninfinity.com.br/health/live',{cache:'no-store',redirect:'error',signal:AbortSignal.timeout(5000)});const health=await response.json();if(response.ok&&health.status==='up'&&health.version===process.env.GITHUB_SHA){confirmed=true;break;}}catch{}
+            try{const response=await fetch('https://app.urbaninfinity.com.br/health/live',{cache:'no-store',redirect:'error',signal:AbortSignal.timeout(5000)});const health=await response.json();if(response.ok&&health.status==='up'&&health.version===process.env.GITHUB_SHA){confirmed=true;break;}}catch{}
             await new Promise(resolve=>setTimeout(resolve,10000));
           }
           if(!confirmed)fail('A nova versao nao foi confirmada. Verifique a atualizacao ou o rollback do Infinityboard no Portainer.');

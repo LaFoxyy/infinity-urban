@@ -11,7 +11,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       DOTNET_ENVIRONMENT: Production
       ASPNETCORE_HTTP_PORTS: "8080"
-      AllowedHosts: infinityboard.urbaninfinity.com.br
+      AllowedHosts: "app.urbaninfinity.com.br;infinityboard.urbaninfinity.com.br"
       Hosting__ProxyNetwork: 10.0.1.0/24
       Hosting__SecretsFile: /run/secrets/infinityboard-channex.json
       Channex__Environment: production
@@ -63,7 +63,7 @@ services:
       labels:
         - traefik.enable=true
         - traefik.docker.network=infinityNet
-        - traefik.http.routers.infinityboard.rule=Host(`infinityboard.urbaninfinity.com.br`)
+        - traefik.http.routers.infinityboard.rule=Host(`app.urbaninfinity.com.br`) || Host(`infinityboard.urbaninfinity.com.br`)
         - traefik.http.routers.infinityboard.entrypoints=websecure
         - traefik.http.routers.infinityboard.tls=true
         - traefik.http.routers.infinityboard.tls.certresolver=letsencryptresolver

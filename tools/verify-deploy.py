@@ -15,11 +15,11 @@ assert app['networks']==['infinityNet'] and stack['networks']['infinityNet']['ex
 assert deploy['replicas']==1 and deploy['update_config']['order']=='stop-first' and deploy['rollback_config']['order']=='stop-first'
 assert deploy['resources']['limits']=={'cpus':'0.50','memory':'512M'}
 assert 'node.hostname == infinityServer' in deploy['placement']['constraints']
-assert env['AllowedHosts']=='infinityboard.urbaninfinity.com.br'
+assert env['AllowedHosts']=='app.urbaninfinity.com.br;infinityboard.urbaninfinity.com.br'
 assert env['Hosting__ProxyNetwork']=='10.0.1.0/24'
 assert env['Channex__Enabled']=='${INFINITYBOARD_CHANNEX_ENABLED:-false}'
 assert env['Hosting__SecretsFile']=='/run/secrets/infinityboard-channex.json'
-assert labels['traefik.http.routers.infinityboard.rule']=='Host(`infinityboard.urbaninfinity.com.br`)'
+assert labels['traefik.http.routers.infinityboard.rule']=='Host(`app.urbaninfinity.com.br`) || Host(`infinityboard.urbaninfinity.com.br`)'
 assert labels['traefik.docker.network']=='infinityNet'
 assert labels['traefik.http.routers.infinityboard.entrypoints']=='websecure'
 assert labels['traefik.http.routers.infinityboard.tls.certresolver']=='letsencryptresolver'
@@ -31,4 +31,4 @@ workflow=yaml.load((root/'.github/workflows/infinityboard.yml').read_text(encodi
 assert set(workflow['jobs'])=={'checks','image','deploy'}
 assert workflow['jobs']['image']['needs']=='checks' and workflow['jobs']['deploy']['needs']=='image'
 assert workflow['jobs']['checks']['runs-on']=='ubuntu-latest' and workflow['jobs']['image']['runs-on']=='ubuntu-latest'
-print('PASS YAML valido: dominio exato, somente nosso servico/volume, sem portas publicas ou socket Docker, limites e inicializacao Channex desativada.')
+print('PASS YAML valido: dois hosts exatos da mesma aplicacao, somente nosso servico/volume, sem portas publicas ou socket Docker, limites e inicializacao Channex desativada.')
