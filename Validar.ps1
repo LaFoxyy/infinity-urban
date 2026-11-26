@@ -7,7 +7,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Falha ao compilar as verificacoes.' }
     & dotnet (Join-Path $build 'InfinityUrban.Checks.dll')
     if ($LASTEXITCODE -ne 0) { throw 'Falha nas verificacoes de integracao.' }
-    foreach ($file in @('check-accommodations-hierarchy.mjs','check-card-actions-ui.mjs','check-channel-general-ui.mjs')) {
+    foreach ($file in @('check-accommodations-hierarchy.mjs','check-card-actions-ui.mjs','check-channel-general-ui.mjs','check-analytics-ui.mjs')) {
         & node (Join-Path $PSScriptRoot ('tools\interface\' + $file))
         if ($LASTEXITCODE -ne 0) { throw 'Falha na verificacao da interface.' }
     }

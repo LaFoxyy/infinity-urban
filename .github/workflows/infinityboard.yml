@@ -39,6 +39,7 @@ jobs:
           node tools/interface/check-accommodations-hierarchy.mjs
           node tools/interface/check-card-actions-ui.mjs
           node tools/interface/check-channel-general-ui.mjs
+          node tools/interface/check-analytics-ui.mjs
 
   image:
     needs: checks

@@ -15,14 +15,14 @@ public sealed class AssignmentsService(SupabaseAuth auth,ManagementService membe
     public async Task<object> List(string token,CancellationToken ct)
     {
         var users=await members.List(token,ct);var rows=await ReadAll(token,Rows+"&order=created_at.desc,id",ct);
-        return new{assignments=rows.Select(a=>a.View()),accounts=users.Where(u=>u.IsRestrictedOwner).Select(u=>new{id=u.Id,fullName=u.FullName,email=u.Email}),people=users.Select(u=>new{id=u.Id,fullName=u.FullName,email=u.Email}),fetchedAt=DateTimeOffset.UtcNow};
+        return new{assignments=rows.Select(a=>a.View()),accounts=users.Where(u=>u.CanReceiveAssignments).Select(u=>new{id=u.Id,fullName=u.FullName,email=u.Email}),people=users.Select(u=>new{id=u.Id,fullName=u.FullName,email=u.Email}),fetchedAt=DateTimeOffset.UtcNow};
     }
     public Task<AssignmentRow[]> Mine(string token,Guid userId,CancellationToken ct)=>ReadAll(token,Rows+$"&user_id=eq.{userId:D}&order=id",ct);
     public async Task<object> Add(string token,AssignmentInput input,CancellationToken ct)
     {
         if(input.UserId==Guid.Empty||input.RoomIds is null||input.RoomIds.Length is <1 or >200||input.RoomIds.Any(id=>id==Guid.Empty))throw new PortalError(400,"Selecione uma conta de proprietário e de 1 a 200 apartamentos.");
         var account=await members.CurrentMember(token,input.UserId.ToString(),ct);
-        if(account?.IsRestrictedOwner!=true)throw new PortalError(400,"Selecione uma conta aprovada com função Proprietário, sem funções administrativas ou de funcionário.");
+        if(account?.CanReceiveAssignments!=true)throw new PortalError(400,"Selecione uma conta aprovada de proprietário ou funcionário, sem função administrativa.");
         var rows=new List<object>();
         foreach(var id in input.RoomIds.Distinct())
         {

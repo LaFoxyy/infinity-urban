@@ -44,6 +44,10 @@ public static class PortalApplication
         builder.Services.AddHttpClient<ChannexMappingWriter>(client=>client.Timeout=TimeSpan.FromSeconds(100)).RedactLoggedHeaders(["user-api-key"]);
         builder.Services.AddScoped<AssignmentsService>();
         builder.Services.AddScoped<PortfolioAccess>();
+        builder.Services.AddSingleton<AnalyticsLedger>();
+        builder.Services.AddTransient<AnalyticsFeedObserver>();
+        builder.Services.AddHttpClient<Stayline.ChannexClient>().AddHttpMessageHandler<AnalyticsFeedObserver>();
+        builder.Services.AddScoped<AnalyticsService>();
         builder.Services.AddAntiforgery(options =>
         {
             options.HeaderName = "X-CSRF-Token";
@@ -199,6 +203,7 @@ public static class PortalApplication
         app.MapOwners();
         app.MapExpenses();
         app.MapReservations();
+        app.MapAnalytics();
         app.MapChannelMapping();
         app.MapAssignments();
         app.MapUnifiedAccommodations();

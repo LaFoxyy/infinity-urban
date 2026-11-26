@@ -127,6 +127,7 @@ await ExpensesChecks.Run(client,fake,catalog,Check,FormToken,Post);
 await PerformanceChecks.Run(client,fake,Check);
 await ChannelMappingChecks.Run(client,fake,catalog,Check,FormToken,Post);
 await ReservationsChecks.Run(app.Services,client,fake,catalog,Check,FormToken,Post);
+await AnalyticsChecks.Run(app.Services,client,fake,catalog,Check);
 await OperationalLinksChecks.Run(app.Services,catalog,Check);
 await BuildingEditorChecks.Run(client,fake,catalog,Check,FormToken,Post);
 await CardActionsChecks.Run(client,fake,catalog,app.Services,Check,FormToken,Post);

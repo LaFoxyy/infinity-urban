@@ -132,6 +132,7 @@ public sealed record PortalMember(Guid Id, string? Email, string? FullName, stri
     public bool CanManage => Status == "approved" && Roles.Any(role => role.Role is "master" or "admin");
     public bool IsOperator => Status=="approved" && Roles.Any(role=>role.Role is "master" or "admin" or "funcionario");
     public bool IsRestrictedOwner => Status=="approved" && !IsOperator && Roles.Any(role=>role.Role=="proprietario");
+    public bool CanReceiveAssignments => Status=="approved" && !CanManage && Roles.Any(role=>role.Role is "proprietario" or "funcionario");
     public bool CanEdit => Status == "approved" && Roles.Any(role => role.Role == "master");
 }
 public sealed record StatusChange(string? Status, string? ExpectedStatus);

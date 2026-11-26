@@ -2,10 +2,10 @@ import {icon,hydrateIcons} from './icons.js';
 const $=id=>document.getElementById(id);
 let csrf;
 export function installNavigation(member){
-  const items=[['/acomodacoes','home','Acomodações'],['/proprietarios','users','Proprietários'],['/despesas-recorrentes','repeat','Despesas recorrentes'],['/designacoes','link','Designações'],['/gestao','shield','Gestão'],['/reservas#lista','file','Reservas'],['/mapeamento','link','Mapeamento Airbnb'],['/operacoes#connection','link','Channex & sync']];
+  const items=[['/dashboard','grid','Dashboard'],['/relatorios','file','Relatórios'],['/acomodacoes','home','Acomodações'],['/proprietarios','users','Proprietários'],['/despesas-recorrentes','repeat','Despesas recorrentes'],['/designacoes','link','Designações'],['/gestao','shield','Gestão'],['/reservas#lista','file','Reservas'],['/mapeamento','link','Mapeamento Airbnb'],['/operacoes#connection','link','Channex & sync']];
   const active=path=>{const [url,hash]=path.split('#');return location.pathname===url&&(url==='/reservas'||!hash||(location.hash.slice(1)||'lista')===hash);};
   const nav=document.querySelector('.sidebar nav');if(!nav)return;
-  nav.innerHTML=items.filter(([path])=>member&&(member.isRestrictedOwner?path==='/acomodacoes':!['/gestao','/designacoes'].includes(path)||member.canManage)).map(([path,symbol,label])=>`<a class="nav-item ${active(path)?'active':''}" href="${path}" title="${label}" ${active(path)?'aria-current="page"':''}>${icon(symbol)}<span>${member.isRestrictedOwner?'Minhas acomodações':label}</span></a>`).join('');
+  nav.innerHTML=items.filter(([path])=>member&&(member.isRestrictedOwner?['/dashboard','/relatorios','/acomodacoes'].includes(path):!['/gestao','/designacoes'].includes(path)||member.canManage)).map(([path,symbol,label])=>`<a class="nav-item ${active(path)?'active':''}" href="${path}" title="${label}" ${active(path)?'aria-current="page"':''}>${icon(symbol)}<span>${member.isRestrictedOwner&&path==='/acomodacoes'?'Minhas acomodações':label}</span></a>`).join('');
 }
 export async function requestJson(path,body){
   if(body!==undefined&&!csrf)csrf=(await requestJson('/api/auth/form')).csrfToken;
