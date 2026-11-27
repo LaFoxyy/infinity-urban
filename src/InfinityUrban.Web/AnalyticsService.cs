@@ -142,15 +142,25 @@ public sealed class AnalyticsService(IDbContextFactory<AppDb> factory,ChannexCli
         return new(from,to,currency,rooms,calculated.Apartments,calculated.Apartments.Where(a=>a.MissingAmounts==0).OrderByDescending(a=>a.RevenueCents).ThenByDescending(a=>a.Occupancy).ThenBy(a=>a.Title).Take(10).ToArray(),calculated.Apartments.Where(a=>a.MissingAmounts==0).OrderBy(a=>a.RevenueCents).ThenBy(a=>a.Occupancy).ThenBy(a=>a.Title).Take(10).ToArray(),calculated.Daily,calculated.Statuses,totals,details.ToArray(),restricted,member.IsOperator,DateTimeOffset.UtcNow,notices.ToArray());
     }
     private static AnalyticsView Empty(DateOnly from,DateOnly to,string currency,bool internalUser)=>new(from,to,currency,[],[],[],[],[],new(),new(0,0,0,0,0,null,0,0,internalUser?0:null,internalUser?0:null),[],true,internalUser,DateTimeOffset.UtcNow,["Nenhum apartamento designado para esta conta. Solicite a designação à administração."]);
-    public static string Csv(AnalyticsView report)
+    public static string Csv(AnalyticsView report,string language="pt-BR")
     {
+        var labels=new Dictionary<string,string>
+        {
+            ["Apartamento"]="Apartment",["Prédio"]="Building",["Reservas"]="Reservations",["Noites ocupadas"]="Occupied nights",["Noites disponíveis"]="Available nights",["Ocupação (%)"]="Occupancy (%)",["Receita confirmada"]="Confirmed revenue",["Estadias sem valor"]="Stays without an amount",["Despesas"]="Expenses",["Saldo após despesas"]="Balance after expenses",["Despesa"]="Expense",["Categoria"]="Category",["Vínculo"]="Linked unit",["Valor"]="Amount",
+            ["Há estadias sem valor confirmado. A receita e o saldo são parciais; a diária do calendário não é usada como receita."]="Some stays have no confirmed amount. Revenue and balance are partial; calendar rates are not used as revenue.",
+            ["Receita das diárias do apartamento distribuída pelas noites da estadia. Check-out não ocupa noite; canceladas não geram receita ou ocupação. Não representa repasse bancário."]="Apartment revenue is allocated across stay nights. Check-out does not occupy a night; cancellations do not generate revenue or occupancy. This is not a bank payout statement.",
+            ["Mensais proporcionais aos dias selecionados; por estadia no check-in; avulsas na data cadastrada. Despesas de prédio e sem vínculo aparecem apenas no consolidado administrativo, sem rateio entre apartamentos."]="Monthly expenses are prorated for selected days; per-stay expenses are charged at check-in; one-offs on their recorded date. Building and unlinked expenses appear only in the administrative consolidated report, without allocation across apartments.",
+            ["Nenhum apartamento designado para esta conta. Solicite a designação à administração."]="No apartments are assigned to this account. Ask the administrator to assign them."
+        };
+        string T(string text)=>language=="en"?labels.GetValueOrDefault(text)??text:text;
         static string Cell(string value)=>"\""+((value.TrimStart().FirstOrDefault() is '=' or '+' or '-' or '@' or '\t' or '\r')?"'":"")+value.Replace("\"","\"\"")+"\"";
         var text=new StringBuilder("\uFEFF");void Row(params string[] cells)=>text.AppendLine(string.Join(';',cells.Select(Cell)));
+        void Header(params string[] cells)=>Row(cells.Select(T).ToArray());
         Row("Infinity Urban",report.From.ToString("dd/MM/yyyy"),report.To.ToString("dd/MM/yyyy"),report.Currency);
-        Row("Apartamento","Prédio","Reservas","Noites ocupadas","Noites disponíveis","Ocupação (%)","Receita confirmada","Estadias sem valor");
+        Header("Apartamento","Prédio","Reservas","Noites ocupadas","Noites disponíveis","Ocupação (%)","Receita confirmada","Estadias sem valor");
         foreach(var room in report.Apartments)Row(room.Title,room.Building,room.Reservations.ToString(),room.OccupiedNights.ToString(),room.TotalNights.ToString(),room.Occupancy.ToString(CultureInfo.InvariantCulture),(room.RevenueCents/100m).ToString("F2",CultureInfo.InvariantCulture),room.MissingAmounts.ToString());
-        Row("Receita confirmada",(report.Totals.RevenueCents/100m).ToString("F2",CultureInfo.InvariantCulture));
-        if(report.CanSeeExpenses){Row("Despesas",(report.Totals.ExpenseCents/100m)?.ToString("F2",CultureInfo.InvariantCulture)??"");Row("Saldo após despesas",(report.Totals.BalanceCents/100m)?.ToString("F2",CultureInfo.InvariantCulture)??"");Row("Despesa","Categoria","Vínculo","Valor");foreach(var expense in report.Expenses)Row(expense.Name,expense.Category,expense.Target,(expense.AmountCents/100m).ToString("F2",CultureInfo.InvariantCulture));}
-        foreach(var note in report.Notices)Row(note);return text.ToString();
+        Row(T("Receita confirmada"),(report.Totals.RevenueCents/100m).ToString("F2",CultureInfo.InvariantCulture));
+        if(report.CanSeeExpenses){Row(T("Despesas"),(report.Totals.ExpenseCents/100m)?.ToString("F2",CultureInfo.InvariantCulture)??"");Row(T("Saldo após despesas"),(report.Totals.BalanceCents/100m)?.ToString("F2",CultureInfo.InvariantCulture)??"");Header("Despesa","Categoria","Vínculo","Valor");foreach(var expense in report.Expenses)Row(expense.Name,expense.Category,expense.Target,(expense.AmountCents/100m).ToString("F2",CultureInfo.InvariantCulture));}
+        foreach(var note in report.Notices)Row(T(note));return text.ToString();
     }
 }

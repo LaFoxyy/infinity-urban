@@ -1,3 +1,5 @@
+import {initLanguage} from './i18n.js';
+initLanguage();
 const $ = (id) => document.getElementById(id);
 let csrfToken;
 let mode = 'login';
@@ -109,17 +111,16 @@ $('login-form').addEventListener('submit', async (event) => {
   }
 });
 
-// These views reproduce the reference; writes remain closed until the existing
-// approval schema and recovery redirects have been verified for the new portal.
-for (const id of ['signup-form', 'recovery-form']) {
-  $(id).addEventListener('submit', (event) => {
-    event.preventDefault();
-    $('signup-password').value = '';
-    feedback(id === 'signup-form'
-      ? 'O cadastro neste novo portal ainda está em preparação. Entre com uma conta existente.'
-      : 'A recuperação de senha neste novo portal ainda está em preparação. Utilize o site atual ou contate a administração.');
-  });
-}
+$('signup-form').addEventListener('submit',async event=>{
+  event.preventDefault();if(busy)return;busy=true;feedback('');
+  const button=event.currentTarget.querySelector('[type=submit]');button.disabled=true;button.textContent='Enviando cadastro…';
+  try{
+    const result=await api('/api/auth/signup',{fullName:$('signup-name').value.trim(),email:$('signup-email').value.trim(),password:$('signup-password').value});
+    $('signup-password').value='';$('login-email').value=$('signup-email').value.trim();busy=false;setMode('login',false);feedback(result.message);
+  }catch(error){feedback(error instanceof TypeError||error.name==='TimeoutError'?'Verifique sua conexão e tente novamente.':error.message);}
+  finally{busy=false;button.disabled=false;button.textContent='Criar conta';}
+});
+$('recovery-form').addEventListener('submit',event=>{event.preventDefault();feedback('Para recuperar sua senha, contate a administração.');});
 
 $('logout').addEventListener('click', async () => {
   $('logout').disabled = true;

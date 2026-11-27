@@ -1,3 +1,4 @@
+import {initLanguage} from './i18n.js';
 import {icon,hydrateIcons} from './icons.js';
 const $=id=>document.getElementById(id);
 let csrf;
@@ -23,6 +24,7 @@ export async function uploadPhoto(file){
   if(!response.ok)throw new Error(data.error||'Não foi possível enviar a foto.');return data;
 }
 export async function initShell(){
+  initLanguage();
   hydrateIcons();installNavigation();
   const data=await requestJson('/api/auth/session');const member=data.member;
   if(!member)throw new Error('Não foi possível verificar seu perfil.');installNavigation(member);
@@ -31,7 +33,7 @@ export async function initShell(){
   let theme='dark';try{theme=localStorage.getItem('urban-theme')==='light'?'light':'dark';}catch{}
   function applyTheme(){document.documentElement.dataset.theme=theme;$('brand-icon').src=`/assets/urban-infinity-icon-${theme}.png`;document.querySelector('link[rel=icon]').href=`/assets/urban-infinity-icon-${theme}.png`;$('theme-toggle').innerHTML=icon(theme==='dark'?'sun':'moon');$('theme-toggle').setAttribute('aria-label',theme==='dark'?'Ativar tema claro':'Ativar tema escuro');}
   applyTheme();$('theme-toggle').addEventListener('click',()=>{theme=theme==='dark'?'light':'dark';applyTheme();try{localStorage.setItem('urban-theme',theme);}catch{}});
-  $('language').replaceChildren(new Option('BR Português','pt-BR'));
+  initLanguage();
   $('refresh').title=location.pathname==='/acomodacoes'?'Atualizar acomodações':'Atualizar operações';
   const mobile=matchMedia('(max-width:760px)');
   function close(){document.body.classList.remove('sidebar-open');$('sidebar-backdrop').hidden=true;$('sidebar').inert=mobile.matches;$('toggle-sidebar').setAttribute('aria-expanded',String(!mobile.matches&&!document.body.classList.contains('sidebar-collapsed')));}
@@ -44,5 +46,5 @@ export async function initShell(){
   document.addEventListener('click',event=>{if(!event.target.closest('.account-menu'))$('account-popover').hidden=true;if(!event.target.closest('#notifications-toggle')&&!event.target.closest('#notifications-popover'))$('notifications-popover').hidden=true;});
   return member;
 }
-export function updateTimestamp(date){document.getElementById('updated-at').textContent=new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short',timeZone:'America/Sao_Paulo'}).format(new Date(date));}
-export function node(tag,className,text){const e=document.createElement(tag);if(className)e.className=className;if(text!==undefined)e.textContent=text;return e;}
+export function updateTimestamp(date){document.getElementById('updated-at').textContent=new Intl.DateTimeFormat(document.documentElement.lang==='en'?'en-US':'pt-BR',{dateStyle:'short',timeStyle:'short',timeZone:'America/Sao_Paulo'}).format(new Date(date));}
+export function node(tag,className,text,literal=false){const e=document.createElement(tag);if(className)e.className=className;if(text!==undefined)e.textContent=text;if(literal)e.dataset.i18nSkip='true';return e;}

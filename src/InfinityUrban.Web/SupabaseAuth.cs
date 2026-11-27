@@ -39,6 +39,33 @@ public sealed class SupabaseAuth(HttpClient http, IConfiguration configuration)
         return user is null ? null : session with { User = user };
     }
 
+    public async Task Register(string name,string email,string password,CancellationToken ct)
+    {
+        // Only a display name is accepted as metadata. Approval and roles remain database-controlled.
+        var redirect="https://app.urbaninfinity.com.br/login";
+        using var response=await Send(HttpMethod.Post,"signup?redirect_to="+Uri.EscapeDataString(redirect),new{email,password,data=new{full_name=name}},null,ct);
+        if(!response.IsSuccessStatusCode)
+        {
+            if((int)response.StatusCode==429)throw new PortalError(429,"Muitas tentativas de cadastro. Aguarde alguns minutos antes de tentar novamente.");
+            JsonDocument error;
+            try{error=await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync(ct),cancellationToken:ct);}
+            catch(JsonException){throw new PortalError(503,"O serviço de cadastro não confirmou a solicitação. Tente novamente mais tarde.");}
+            using var errorDocument=error;
+            var code=error.RootElement.TryGetProperty("code",out var value)?value.GetString():null;
+            if(code is "user_already_exists" or "email_exists")return; // Same public response prevents account enumeration.
+            if(code=="weak_password")throw new PortalError(400,"A senha não atende aos requisitos. Use uma senha mais longa, com letras, números e símbolos.");
+            if(code=="email_address_invalid")throw new PortalError(400,"Informe um email válido para o cadastro.");
+            throw new PortalError(503,"O serviço de cadastro não confirmou a solicitação. Tente novamente mais tarde.");
+        }
+        using var result=await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync(ct),cancellationToken:ct);
+        // Supabase can return a session when email confirmation is disabled. Never give that
+        // session to the browser or bypass the existing approved-profile check.
+        if(result.RootElement.TryGetProperty("access_token",out var token)&&token.ValueKind==JsonValueKind.String&&token.GetString() is {Length:>0} access)
+        {
+            try{await SignOut(access,ct);}catch(HttpRequestException){}catch(TaskCanceledException)when(!ct.IsCancellationRequested){}
+        }
+    }
+
     public async Task<AuthUser?> GetUser(string token, CancellationToken ct)
     {
         using var response = await Send(HttpMethod.Get, "user", null, token, ct);
@@ -86,4 +113,5 @@ public sealed record AuthUser(
     [property: JsonPropertyName("email")] string? Email);
 
 public sealed record LoginRequest(string? Email, string? Password);
+public sealed record SignupRequest(string? FullName,string? Email,string? Password);
 public sealed record AccountProfile([property: JsonPropertyName("status")] string? Status);

@@ -64,5 +64,7 @@ static class AnalyticsChecks
         using var reportResponse=await client.GetAsync(url);var report=await reportResponse.Content.ReadFromJsonAsync<AnalyticsView>();
         var formula=AnalyticsService.Csv(report! with{Apartments=[new(roomId,"=HYPERLINK(1)","@SUM(1)",0,0,30,0,0,0)]});
         check(formula.Contains("'=HYPERLINK")&&formula.Contains("'@SUM"),"CSV labels cannot execute spreadsheet formulas");
+        var english=AnalyticsService.Csv(report! with{Apartments=[new(roomId,"Apartamento do proprietário","Prédio cadastrado",0,0,30,0,0,0)]},"en");
+        check(english.Contains("Confirmed revenue")&&english.Contains("Available nights")&&english.Contains("Apartamento do proprietário")&&english.Contains("Prédio cadastrado"),"English CSV translates report headings while preserving registered apartment and building names");
     }
 }

@@ -100,6 +100,9 @@ public static class PortalApplication
             options.AddPolicy("login", context => RateLimitPartition.GetFixedWindowLimiter(
                 context.Connection.RemoteIpAddress?.ToString() ?? "unknown", _ => new FixedWindowRateLimiterOptions
                 { PermitLimit = 6, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+            options.AddPolicy("signup",context=>RateLimitPartition.GetFixedWindowLimiter(
+                context.Connection.RemoteIpAddress?.ToString()??"unknown",_=>new FixedWindowRateLimiterOptions
+                {PermitLimit=4,Window=TimeSpan.FromMinutes(5),QueueLimit=0}));
         });
         configure?.Invoke(builder);
         var app = builder.Build();
@@ -155,6 +158,15 @@ public static class PortalApplication
         });
         app.MapGet("/api/auth/form", (HttpContext context, IAntiforgery antiforgery, SupabaseAuth auth) =>
             Results.Json(new { csrfToken = antiforgery.GetAndStoreTokens(context).RequestToken, configured = auth.IsConfigured }));
+        app.MapPost("/api/auth/signup",async(SignupRequest input,HttpContext context,SupabaseAuth auth)=>
+        {
+            if(!auth.IsConfigured)throw new PortalError(503,"O cadastro aguarda a configuração do serviço de autenticação.");
+            var name=input.FullName?.Trim();var email=input.Email?.Trim();
+            if(string.IsNullOrWhiteSpace(name)||name.Length is <2 or >150||name.Any(char.IsControl)||string.IsNullOrEmpty(email)||email.Length>254||!MailAddress.TryCreate(email,out var address)||address.Address!=email||string.IsNullOrEmpty(input.Password)||input.Password.Length is <8 or >4096)
+                throw new PortalError(400,"Informe nome completo, email válido e uma senha com pelo menos 8 caracteres.");
+            await auth.Register(name,email,input.Password,context.RequestAborted);
+            return Results.Ok(new{message="Solicitação recebida. Se necessário, confirme seu email. O acesso depende da aprovação de um administrador."});
+        }).RequireRateLimiting("signup");
         app.MapPost("/api/auth/login", async (LoginRequest input, HttpContext context, SupabaseAuth auth) =>
         {
             if (!auth.IsConfigured) return Results.Json(new { error = "O login aguarda a configuração do Supabase." }, statusCode: 503);

@@ -14,6 +14,7 @@ sealed partial class FakeSupabase : HttpMessageHandler
     public bool Revoked, RejectIdentity, Unavailable, Deleted, ForceConflict, MissingTargetRole, MultipleTargetRoles;
     public string AccountStatus = "approved", CurrentRole = "master", TargetRole = "proprietario", TargetStatus = "approved";
     public List<string> Paths = [];
+    public int SignupRequests;public string SignupMode="ok";public JsonElement SignupPayload;public bool SignupSessionRevoked;
     private readonly Dictionary<Guid, string> statuses = [];
     private readonly Dictionary<Guid, MemberRole> assignedRoles = [];
     private readonly HashSet<Guid> deleted = [];
@@ -68,6 +69,16 @@ sealed partial class FakeSupabase : HttpMessageHandler
             var path=request.RequestUri!.AbsolutePath;Paths.Add(path);
             if(Unavailable)return new(HttpStatusCode.ServiceUnavailable);
             var query=Query(request.RequestUri);
+            if(path.EndsWith("/signup"))
+            {
+                SignupRequests++;SignupPayload=input.Clone();
+                if(request.Headers.Authorization is not null)throw new Exception("Public registration must not carry another user's token.");
+                if(SignupMode=="weak")return new(HttpStatusCode.UnprocessableEntity){Content=JsonContent.Create(new{code="weak_password"})};
+                if(SignupMode=="duplicate")return new(HttpStatusCode.UnprocessableEntity){Content=JsonContent.Create(new{code="user_already_exists"})};
+                if(SignupMode=="unavailable")return new(HttpStatusCode.ServiceUnavailable){Content=new StringContent("upstream unavailable")};
+                return SignupMode=="session"?Ok(new{access_token="new-signup-session",user=new{id=Guid.NewGuid()}}):Ok(new{user=new{id=Guid.NewGuid()}});
+            }
+            if(path.EndsWith("/logout")&&request.Headers.Authorization?.Parameter=="new-signup-session"){SignupSessionRevoked=true;return new(HttpStatusCode.NoContent);}
             if(path.EndsWith("/token"))return input.GetProperty("password").GetString()=="valid-test-password"
                 ?Ok(new{access_token=AccessToken,expires_in=3600,user=new{id=CurrentId,email="demo@example.com"}}):new(HttpStatusCode.BadRequest);
             if(request.Headers.Authorization?.Parameter!=AccessToken)throw new Exception("Every protected Supabase call must carry the end-user JWT.");

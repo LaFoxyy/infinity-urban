@@ -16,6 +16,6 @@ public static class AnalyticsEndpoints
         api.MapGet("",async(HttpContext context,AnalyticsService service,DateOnly? from,DateOnly? to,Guid? roomId,string? currency)=>
         {var period=Period(from,to);return await service.Read(context,period.From,period.To,roomId,currency??"BRL");});
         api.MapGet("/export.csv",async(HttpContext context,AnalyticsService service,DateOnly? from,DateOnly? to,Guid? roomId,string? currency)=>
-        {var period=Period(from,to);var report=await service.Read(context,period.From,period.To,roomId,currency??"BRL");return Results.File(Encoding.UTF8.GetBytes(AnalyticsService.Csv(report)),"text/csv; charset=utf-8",$"infinity-urban-{period.From:yyyy-MM-dd}-{period.To:yyyy-MM-dd}.csv");});
+        {var period=Period(from,to);var report=await service.Read(context,period.From,period.To,roomId,currency??"BRL");return Results.File(Encoding.UTF8.GetBytes(AnalyticsService.Csv(report,context.Request.Cookies["urban-language"]??"pt-BR")),"text/csv; charset=utf-8",$"infinity-urban-{period.From:yyyy-MM-dd}-{period.To:yyyy-MM-dd}.csv");});
     }
 }

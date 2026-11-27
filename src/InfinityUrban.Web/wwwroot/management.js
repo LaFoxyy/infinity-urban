@@ -1,3 +1,4 @@
+import {initLanguage} from './i18n.js';
 import { hydrateIcons, icon } from './icons.js';
 import {installNavigation} from './shell.js';
 
@@ -17,6 +18,7 @@ const t = () => copy[language];
 function readPreference(key) { try { return localStorage.getItem(key); } catch { return null; } }
 function savePreference(key,value) { try { localStorage.setItem(key,value); } catch { /* Preferences are optional. No auth tokens are stored here. */ } }
 
+initLanguage();
 hydrateIcons();
 applyTheme(readPreference('urban-theme') === 'light' ? 'light' : 'dark');
 applyLanguage();
@@ -73,7 +75,7 @@ function updateActor() {
 }
 
 function updateTimestamp() {
-  if (fetchedAt) $('updated-at').textContent = new Intl.DateTimeFormat(language === 'pt-BR' ? 'en-US' : language, {year:'2-digit',month:'2-digit',day:'2-digit',hour:'numeric',minute:'2-digit',timeZone:'America/Sao_Paulo'}).format(new Date(fetchedAt));
+  if (fetchedAt) $('updated-at').textContent = new Intl.DateTimeFormat(language === 'pt-BR' ? 'pt-BR' : 'en-US', {year:'2-digit',month:'2-digit',day:'2-digit',hour:'numeric',minute:'2-digit',timeZone:'America/Sao_Paulo'}).format(new Date(fetchedAt));
 }
 
 function setStatus(status, focus = false) {

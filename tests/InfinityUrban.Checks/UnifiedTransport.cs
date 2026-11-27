@@ -4,6 +4,7 @@ using System.Text.Json;
 sealed partial class UnifiedTransport:HttpMessageHandler
 {
  public static readonly string PropertyFacility=Guid.NewGuid().ToString();
+ public static readonly string RoomFacility=Guid.NewGuid().ToString();
  public static readonly string ExistingProperty=Guid.NewGuid().ToString(),ExistingRoom=Guid.NewGuid().ToString(),EmptyProperty=Guid.NewGuid().ToString(),SiblingRoom=Guid.NewGuid().ToString();
  public List<string> Hosts=[];public List<(string Resource,JsonElement Body)> Writes=[];public int Uploads;public bool LoseRoomResponse;public bool OmitContactOnCreate;public string? RemoveRoomOnRead;
  private readonly Dictionary<string,JsonElement> entities=[];
@@ -25,8 +26,8 @@ sealed partial class UnifiedTransport:HttpMessageHandler
   if(request.Method==HttpMethod.Get)
   {
    if(path=="room_types/"+RemoveRoomOnRead){entities.Remove(path);RemoveRoomOnRead=null;}
-   if(path=="property_facilities/options")return Ok(new{data=new[]{new{id=PropertyFacility,attributes=new{title="Elevador"}}}});
-   if(path=="room_facilities/options")return Ok(new{data=Array.Empty<object>()});
+   if(path=="property_facilities/options")return Ok(new{data=new[]{new{id=PropertyFacility,attributes=new{title="Elevators"}}}});
+   if(path=="room_facilities/options")return Ok(new{data=new[]{new{id=RoomFacility,attributes=new{title="Airconditioning"}}}});
    if(entities.TryGetValue(path,out var found))return Ok(new{data=found});
    if(path.Split('/').Length==2&&Guid.TryParse(path.Split('/')[1],out _))return new HttpResponseMessage(HttpStatusCode.NotFound){Content=JsonContent.Create(new{errors=new{title="Not found"}})};
    var rows=entities.Where(x=>x.Key.StartsWith(path+"/")).Select(x=>x.Value).ToArray();

@@ -120,6 +120,7 @@ var cookie = login.Headers.GetValues("Set-Cookie").Single(value => value.StartsW
 Check(cookie.Contains("httponly", StringComparison.OrdinalIgnoreCase) && cookie.Contains("samesite=strict", StringComparison.OrdinalIgnoreCase) && !cookie.Contains(FakeSupabase.AccessToken), "Session cookie is encrypted, HttpOnly and SameSite strict");
 Check((await client.GetAsync("/api/auth/session")).IsSuccessStatusCode && fake.UserCalls >= 2, "Identity is revalidated with Supabase for protected requests");
 await ManagementChecks.Run(client, handler, fake, Check, FormToken, Post);
+await SignupChecks.Run(app.Services,client,fake,Check,FormToken,Post);
 await UnifiedChecks.Run(client,fake,catalog,app.Services,Check,FormToken,Post);
 await OwnersChecks.Run(client,fake,catalog,Check,FormToken,Post);
 await AssignmentsChecks.Run(client,fake,catalog,Check,FormToken,Post);

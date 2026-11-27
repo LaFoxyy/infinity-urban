@@ -40,6 +40,7 @@ jobs:
           node tools/interface/check-card-actions-ui.mjs
           node tools/interface/check-channel-general-ui.mjs
           node tools/interface/check-analytics-ui.mjs
+          node tools/interface/check-i18n.mjs
 
   image:
     needs: checks
